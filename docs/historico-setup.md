@@ -9,7 +9,10 @@ Consolidar tudo que já foi feito no projeto até agora, o que está funcionando
 - A base documental do produto foi criada e refinada.
 - O scaffold inicial do backend foi criado com FastAPI, SQLAlchemy, Alembic, Celery e Docker Compose.
 - O carregamento da aplicação e do metadata ORM foi validado com sucesso.
-- A primeira migration ainda não foi gerada porque o PostgreSQL local não subiu (daemon do Docker indisponível durante os testes).
+- O Docker subiu corretamente com Postgres e Redis em estado healthy.
+- A primeira migration foi gerada com sucesso em alembic/versions/cca771ed5ba7_initial_schema.py.
+- O comando de upgrade do Alembic foi executado sem erro.
+- A API subiu e o endpoint /health respondeu 200 OK.
 
 ## Linha do tempo do que foi feito
 
@@ -84,6 +87,16 @@ Observação:
 - Sem PostgreSQL ativo em localhost:5432, o comando de autogeração do Alembic falhou por timeout de conexão.
 - Por esse motivo, a pasta alembic/versions ficou sem arquivo de migration gerado.
 
+### 6. Reteste bem-sucedido
+
+- Docker daemon foi iniciado e o comando docker compose up -d concluiu com sucesso.
+- docker compose ps confirmou postgres e redis com status healthy.
+- O comando de autogeração criou a migration inicial:
+	- alembic/versions/cca771ed5ba7_initial_schema.py
+- O comando de upgrade head foi executado sem falhas.
+- A API foi executada com Uvicorn.
+- O endpoint /health retornou 200 OK.
+
 ## Status atual
 
 ### Pronto
@@ -96,9 +109,8 @@ Observação:
 
 ### Pendente
 
-- Subir Postgres e Redis localmente via Docker.
-- Gerar a primeira migration.
-- Aplicar migration no banco local.
+- Nenhum item bloqueante para o setup inicial.
+- Próxima etapa: começar implementação das regras de negócio.
 
 ## O que é necessário para rodar localmente
 
@@ -143,6 +155,20 @@ http://127.0.0.1:8000/health
 
 Resposta esperada: status ok.
 
+## Erros comuns e correções
+
+1. Erro: No script_location key found in configuration.
+- Causa: comando executado fora da raiz do repositório (por exemplo, dentro de .venv/Scripts).
+- Correção: voltar para a pasta raiz do projeto antes de chamar o Alembic.
+
+2. Erro: Set-Location com parâmetro -m ao tentar rodar upgrade.
+- Causa: uso de cd para executar comando Python.
+- Correção: não usar cd para executar Python. Execute diretamente o comando do interpretador.
+
+3. Erro: timeout em localhost:5432.
+- Causa: Docker daemon desligado ou containers não iniciados.
+- Correção: iniciar Docker Desktop, rodar docker compose up -d e confirmar via docker compose ps.
+
 ## Checklist de confirmação final
 
 - Docker compose em execução sem erro.
@@ -150,6 +176,10 @@ Resposta esperada: status ok.
 - Arquivo de migration criado em alembic/versions.
 - Alembic upgrade head executado com sucesso.
 - Endpoint /health respondendo corretamente.
+
+Status atual do checklist:
+
+- Concluído.
 
 ## Próxima etapa depois do setup
 
