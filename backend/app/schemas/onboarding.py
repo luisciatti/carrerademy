@@ -29,6 +29,8 @@ class PublicPathStep(BaseModel):
 	status: str
 	is_free: bool
 	is_description_locked: bool
+	content_type: str | None
+	external_url: str | None
 
 
 class CareerPathView(BaseModel):

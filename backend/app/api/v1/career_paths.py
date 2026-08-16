@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.core.deps import get_current_user, get_db
 from app.domain.enums import CareerPathStatus, SubscriptionStatus
-from app.domain.models import CareerPath, Subscription, User
+from app.domain.models import CareerPath, PathStep, Subscription, User
 from app.schemas.career_path import CareerPathView, PublicPathStep
 
 router = APIRouter()
@@ -34,7 +34,7 @@ def get_career_path_by_id(
 ) -> CareerPathView:
 	career_path = db.scalar(
 		select(CareerPath)
-		.options(selectinload(CareerPath.steps))
+		.options(selectinload(CareerPath.steps).selectinload(PathStep.content_item))
 		.where(CareerPath.id == career_path_id, CareerPath.user_id == current_user.id)
 	)
 	if career_path is None:
@@ -46,7 +46,7 @@ def get_career_path_by_id(
 def _get_priority_career_path(*, db: Session, user_id: uuid.UUID) -> CareerPath | None:
 	prioritized = db.scalar(
 		select(CareerPath)
-		.options(selectinload(CareerPath.steps))
+		.options(selectinload(CareerPath.steps).selectinload(PathStep.content_item))
 		.where(
 			CareerPath.user_id == user_id,
 			CareerPath.status.in_([CareerPathStatus.GENERATING, CareerPathStatus.ACTIVE]),
@@ -58,7 +58,7 @@ def _get_priority_career_path(*, db: Session, user_id: uuid.UUID) -> CareerPath 
 
 	return db.scalar(
 		select(CareerPath)
-		.options(selectinload(CareerPath.steps))
+		.options(selectinload(CareerPath.steps).selectinload(PathStep.content_item))
 		.where(CareerPath.user_id == user_id)
 		.order_by(desc(CareerPath.generated_at))
 	)
@@ -79,6 +79,8 @@ def _serialize_career_path(*, db: Session, user: User, career_path: CareerPath) 
 				status=step.status.value,
 				is_free=step.is_free,
 				is_description_locked=hide_description,
+				content_type=step.content_item.type.value if step.content_item else None,
+				external_url=step.content_item.external_url if step.content_item else None,
 			)
 		)
 

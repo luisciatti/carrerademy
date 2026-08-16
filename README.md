@@ -31,16 +31,29 @@ docker compose up -d
 3. Aplique migrations:
 
 ```powershell
-python -m alembic upgrade head
+C:/Users/luisc/OneDrive/Desktop/CarrerAdemy/.venv/Scripts/alembic.exe upgrade head
 ```
 
-4. Suba a API:
+4. Popule a base curada inicial de conteudo:
 
 ```powershell
-python -m uvicorn app.main:app --reload
+$env:PYTHONPATH="C:/Users/luisc/OneDrive/Desktop/CarrerAdemy/backend"
+C:/Users/luisc/OneDrive/Desktop/CarrerAdemy/.venv/Scripts/python.exe scripts/seed_content_items.py
 ```
 
-5. Teste o health check:
+5. Suba a API:
+
+```powershell
+uvicorn app.main:app --reload
+```
+
+6. Em outro terminal, suba o worker Celery (Windows):
+
+```powershell
+celery -A app.infra.queue.celery_app worker --loglevel=info --pool=solo
+```
+
+7. Teste o health check:
 
 - `http://127.0.0.1:8000/health`
 
@@ -58,13 +71,19 @@ Set-Location C:/Users/luisc/OneDrive/Desktop/CarrerAdemy/frontend
 npm install
 ```
 
-3. Rode em desenvolvimento:
+3. Garanta a variavel de ambiente da API (arquivo `frontend/.env.local`):
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
+
+4. Rode em desenvolvimento:
 
 ```powershell
 npm run dev
 ```
 
-4. Acesse:
+5. Acesse:
 
 - `http://localhost:3000`
 

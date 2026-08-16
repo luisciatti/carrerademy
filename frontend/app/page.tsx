@@ -1,34 +1,40 @@
-import { SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
+import Link from "next/link";
+import { SignInButton, SignUpButton } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 
 export default async function Home() {
   const { userId } = await auth();
 
+  if (userId) {
+    redirect("/dashboard");
+  }
+
   return (
-    <div className="flex flex-1 items-center justify-center bg-zinc-50 px-6">
-      <main className="w-full max-w-xl rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm">
-        <h1 className="text-2xl font-semibold text-zinc-900">CareerAdemy Auth Test</h1>
-        <p className="mt-2 text-sm text-zinc-600">
-          Use the controls below to validate Clerk sign-in and sign-up.
+    <div className="relative flex min-h-screen items-center justify-center px-6">
+      <main className="w-full max-w-4xl rounded-3xl border border-violet-900/40 bg-zinc-950/80 p-8 shadow-[0_0_60px_rgba(76,29,149,0.2)] md:p-12">
+        <p className="text-xs uppercase tracking-[0.2em] text-violet-300">Cloud journey accelerator</p>
+        <h1 className="mt-4 text-4xl font-black leading-tight text-zinc-100 md:text-5xl">
+          Aprenda com trilha adaptada ao seu objetivo.
+        </h1>
+        <p className="mt-4 max-w-2xl text-zinc-300">
+          O CarrerAdemy transforma seu onboarding em um mapa de progresso com etapas desbloqueadas, contexto claro e foco total no proximo passo.
         </p>
 
-        <div className="mt-8 flex items-center gap-4">
-          {!userId ? (
-            <>
-              <SignInButton mode="modal">
-                <button className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700">
-                  Sign in
-                </button>
-              </SignInButton>
-              <SignUpButton mode="modal">
-                <button className="rounded-md border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-900 hover:bg-zinc-100">
-                  Sign up
-                </button>
-              </SignUpButton>
-            </>
-          ) : (
-            <UserButton afterSignOutUrl="/" />
-          )}
+        <div className="mt-8 flex flex-wrap gap-3">
+          <SignInButton mode="modal">
+            <button className="rounded-lg bg-violet-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-violet-400">
+              Entrar
+            </button>
+          </SignInButton>
+          <SignUpButton mode="modal">
+            <button className="rounded-lg border border-zinc-700 px-5 py-2.5 text-sm font-semibold text-zinc-200 hover:border-violet-400">
+              Criar conta
+            </button>
+          </SignUpButton>
+          <Link href="/sign-in" className="rounded-lg border border-zinc-700 px-5 py-2.5 text-sm font-semibold text-zinc-300 hover:border-zinc-500">
+            Abrir tela de login
+          </Link>
         </div>
       </main>
     </div>
