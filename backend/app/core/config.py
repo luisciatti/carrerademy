@@ -15,6 +15,9 @@ class Settings(BaseSettings):
     redis_url: str = Field(..., alias="REDIS_URL")
 
     openai_api_key: str | None = Field(default=None, alias="OPENAI_API_KEY")
+    openai_model: str = Field(default="gpt-4o-mini", alias="OPENAI_MODEL")
+    openai_base_url: str = Field(default="https://api.openai.com/v1", alias="OPENAI_BASE_URL")
+    onboarding_generation_daily_limit: int = Field(default=3, alias="ONBOARDING_GENERATION_DAILY_LIMIT")
     stripe_api_key: str | None = Field(default=None, alias="STRIPE_API_KEY")
     stripe_webhook_secret: str | None = Field(default=None, alias="STRIPE_WEBHOOK_SECRET")
     mercado_pago_access_token: str | None = Field(default=None, alias="MERCADO_PAGO_ACCESS_TOKEN")

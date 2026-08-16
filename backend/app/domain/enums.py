@@ -9,6 +9,7 @@ class GoalType(str, enum.Enum):
 
 
 class CareerPathStatus(str, enum.Enum):
+    GENERATING = "GENERATING"
     ACTIVE = "ACTIVE"
     COMPLETED = "COMPLETED"
     ARCHIVED = "ARCHIVED"

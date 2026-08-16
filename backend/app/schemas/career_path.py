@@ -1,1 +1,4 @@
-"""Career path schemas will be added in a later phase."""
+from app.schemas.onboarding import CareerPathView, PublicPathStep
+
+
+__all__ = ["CareerPathView", "PublicPathStep"]
