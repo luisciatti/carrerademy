@@ -1,7 +1,26 @@
-.env
+# Backend (Python)
+backend/.venv/
+backend/__pycache__/
+backend/.env
+backend/.pytest_cache/
+backend/.mypy_cache/
+backend/*.py[cod]
+backend/career_path_ai_backend.egg-info/
+
+# Frontend (Node)
+frontend/node_modules/
+frontend/.next/
+frontend/.env.local
+frontend/coverage/
+frontend/out/
+frontend/build/
+frontend/.pnpm-debug.log*
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/*.tsbuildinfo
+
+# Geral
 .venv/
 __pycache__/
-*.py[cod]
-.pytest_cache/
-.mypy_cache/
-career_path_ai_backend.egg-info/
+.DS_Store

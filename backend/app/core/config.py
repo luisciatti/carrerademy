@@ -25,6 +25,10 @@ class Settings(BaseSettings):
     auth0_domain: str | None = Field(default=None, alias="AUTH0_DOMAIN")
     auth0_audience: str | None = Field(default=None, alias="AUTH0_AUDIENCE")
     clerk_secret_key: str | None = Field(default=None, alias="CLERK_SECRET_KEY")
+    clerk_issuer: str | None = Field(default=None, alias="CLERK_ISSUER")
+    clerk_jwks_url: str | None = Field(default=None, alias="CLERK_JWKS_URL")
+    clerk_jwks_cache_ttl_seconds: int = Field(default=3600, alias="CLERK_JWKS_CACHE_TTL_SECONDS")
+    clerk_webhook_signing_secret: str | None = Field(default=None, alias="CLERK_WEBHOOK_SIGNING_SECRET")
 
     model_config = SettingsConfigDict(
         env_file=".env",

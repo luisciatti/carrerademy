@@ -132,8 +132,8 @@ Valores esperados principais:
 
 ## Passo a passo de primeira execução
 
-1. Abrir terminal na pasta do projeto:
-C:\Users\luisc\OneDrive\Desktop\CarrerAdemy\carrerademy
+1. Abrir terminal na pasta do backend:
+C:\Users\luisc\OneDrive\Desktop\CarrerAdemy\backend
 
 2. Subir infraestrutura local:
 docker compose up -d
@@ -142,13 +142,13 @@ docker compose up -d
 docker compose ps
 
 4. Gerar primeira migration:
-c:/Users/luisc/OneDrive/Desktop/CarrerAdemy/.venv/Scripts/python.exe -m alembic revision --autogenerate -m initial_schema
+python -m alembic revision --autogenerate -m initial_schema
 
 5. Aplicar migration:
-c:/Users/luisc/OneDrive/Desktop/CarrerAdemy/.venv/Scripts/python.exe -m alembic upgrade head
+python -m alembic upgrade head
 
 6. Subir API para teste rápido:
-c:/Users/luisc/OneDrive/Desktop/CarrerAdemy/.venv/Scripts/python.exe -m uvicorn app.main:app --reload
+python -m uvicorn app.main:app --reload
 
 7. Testar health check:
 http://127.0.0.1:8000/health
@@ -189,3 +189,86 @@ Status atual do checklist:
 - Implementar integração de assinatura e webhooks.
 
 Esses itens ficam fora da etapa atual de setup.
+
+## Etapas adicionais concluídas: autenticação Clerk
+
+### Backend (FastAPI)
+
+- Implementada validação de JWT do Clerk via JWKS com cache local.
+- Middleware da API configurado para autenticação por padrão com allowlist de rotas públicas.
+- Dependência autenticada criada para sincronizar usuário local por clerk_user_id.
+- Endpoint protegido de verificação criado em /api/v1/me.
+- Webhook Clerk implementado com validação Svix para user.created e user.deleted.
+- Migration adicional aplicada para incluir users.clerk_user_id com índice e unicidade.
+
+Arquivos principais desta etapa:
+
+- app/core/config.py
+- app/core/deps.py
+- app/core/security.py
+- app/infra/auth/clerk.py
+- app/api/v1/me.py
+- app/api/v1/webhooks.py
+- app/domain/models.py
+- alembic/versions/82208cb819c4_clerk_auth_user_link.py
+
+Validações registradas:
+
+- /health sem token retorna 200.
+- /api/v1/me sem token retorna 401.
+- Alembic upgrade head concluído incluindo revisão de Clerk.
+
+### Frontend (Next.js + Clerk)
+
+- Clerk CLI autenticado e app vinculado com sucesso ao projeto CarrerAdemy.
+- Frontend consolidado no monorepo em:
+	- C:/Users/luisc/OneDrive/Desktop/CarrerAdemy/frontend
+- Integração manual concluída após falha do fluxo automático do `clerk init` com erro EEXIST.
+- Dependência @clerk/nextjs presente no projeto.
+- ClerkProvider adicionado no layout.
+- Páginas de autenticação criadas:
+	- app/sign-in/[[...sign-in]]/page.tsx
+	- app/sign-up/[[...sign-up]]/page.tsx
+- Arquivo proxy.ts criado com matcher incluindo:
+	- /(api|trpc)(.*)
+	- /__clerk/:path*
+- Página inicial ajustada para exibir:
+	- estado deslogado com SignInButton e SignUpButton
+	- estado logado com UserButton
+- Variáveis puxadas com clerk env pull para .env.local.
+- `clerk doctor` executado com status final "All checks passing".
+- `npm run lint` executado sem erros.
+- `npm run dev` validado com servidor ativo em http://localhost:3000.
+
+## Observações operacionais recentes
+
+1. `clerk env pull` não aceita caminho como argumento.
+- Exemplo inválido: clerk env pull .env.local
+- Uso correto: clerk env pull
+
+2. Em alguns cenários, `clerk init` em projeto já existente pode tentar criar pasta e falhar com EEXIST.
+- Fallback recomendado: aplicar integração manual (provider, proxy, rotas sign-in/sign-up, env) e validar com clerk doctor.
+
+## Reorganização para monorepo
+
+Estrutura consolidada em uma única raiz:
+
+- C:/Users/luisc/OneDrive/Desktop/CarrerAdemy/backend
+- C:/Users/luisc/OneDrive/Desktop/CarrerAdemy/frontend
+- C:/Users/luisc/OneDrive/Desktop/CarrerAdemy/docs
+
+Mudanças executadas:
+
+- Conteúdo antigo de carrerademy movido para backend.
+- Conteúdo antigo de my-clerk-next-app movido para frontend.
+- Documentação centralizada em docs na raiz.
+- `.git` consolidado na raiz para manter um único repositório.
+- `.gitignore` único criado na raiz cobrindo backend e frontend.
+
+Validação pós-migração:
+
+- `docker compose up -d` funcional a partir de backend.
+- API respondeu 200 em `/health`.
+- Frontend subiu com `npm run dev` e respondeu 200 em `/`.
+- Ajuste de compatibilidade com Clerk Core 3 aplicado na home.
+- `git status` na raiz não listou `.venv`, `node_modules`, `.env` nem `.env.local` como arquivos a commitar.

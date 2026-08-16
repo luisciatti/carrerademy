@@ -1,26 +1,85 @@
-# Career Path AI
+# CarrerAdemy Monorepo
 
-Documentação inicial do produto e do domínio antes da implementação.
+Este repositório unifica backend e frontend em uma única raiz para versionamento e deploy coordenado.
 
-## Documentos
+## Estrutura
 
-- [Visão de domínio](docs/domain-model.md)
-- [Estrutura do backend](docs/backend-structure.md)
-- [Histórico de setup e execução local](docs/historico-setup.md)
+- `backend/`: API FastAPI, modelos SQLAlchemy, Alembic, Docker Compose e integrações de autenticação.
+- `frontend/`: aplicação Next.js com Clerk.
+- `docs/`: documentação funcional e técnica do projeto.
 
-## Stack prevista
+## Pré-requisitos
 
-- Backend: FastAPI + SQLAlchemy + Alembic
-- Banco: PostgreSQL
-- Fila: Celery + Redis
-- Frontend: Next.js + TypeScript + Tailwind + Framer Motion
-- Auth: Clerk ou Auth0
-- Pagamentos: Stripe + Mercado Pago/Pagar.me
-- IA: provedor externo de LLM
+- Docker Desktop ativo (engine Linux)
+- Python 3.11+ com ambiente virtual para o backend
+- Node.js 20+ e npm
 
-## Princípios desta fase
+## Como rodar o backend
 
-- Modelar o domínio antes de escrever schema, rotas ou jobs.
-- Tratar trilha, assinatura e consumo da etapa gratuita como regras centrais.
-- Manter IA como mecanismo de personalização sobre conteúdo curado.
-- Considerar segurança, LGPD, cobrança e controle de custo desde o MVP.
+1. Entre na pasta do backend:
+
+```powershell
+Set-Location C:/Users/luisc/OneDrive/Desktop/CarrerAdemy/backend
+```
+
+2. Suba infraestrutura local:
+
+```powershell
+docker compose up -d
+```
+
+3. Aplique migrations:
+
+```powershell
+python -m alembic upgrade head
+```
+
+4. Suba a API:
+
+```powershell
+python -m uvicorn app.main:app --reload
+```
+
+5. Teste o health check:
+
+- `http://127.0.0.1:8000/health`
+
+## Como rodar o frontend
+
+1. Entre na pasta do frontend:
+
+```powershell
+Set-Location C:/Users/luisc/OneDrive/Desktop/CarrerAdemy/frontend
+```
+
+2. Instale dependências (se necessário):
+
+```powershell
+npm install
+```
+
+3. Rode em desenvolvimento:
+
+```powershell
+npm run dev
+```
+
+4. Acesse:
+
+- `http://localhost:3000`
+
+## Comandos úteis
+
+- Backend lint/testes: definir conforme a evolução do projeto.
+- Frontend lint:
+
+```powershell
+Set-Location C:/Users/luisc/OneDrive/Desktop/CarrerAdemy/frontend
+npm run lint
+```
+
+## Documentação
+
+- `docs/domain-model.md`
+- `docs/backend-structure.md`
+- `docs/historico-setup.md`
