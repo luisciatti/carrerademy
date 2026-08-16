@@ -4,6 +4,22 @@
 
 Definir o domínio do produto antes da implementação para alinhar linguagem, regras de negócio, entidades, fluxos e limites do MVP.
 
+## Decisões já fechadas
+
+- Backend em FastAPI.
+- Persistência com SQLAlchemy e migrations com Alembic.
+- Banco PostgreSQL.
+- Processamento assíncrono com Celery e Redis.
+- Chaves primárias em UUID.
+- Uma etapa gratuita única por conta, controlada por `User.free_step_used`.
+- Uma trilha por onboarding no MVP.
+- Uma assinatura relevante por usuário no MVP.
+- `PathStep.status` representa o estado atual da etapa.
+- `UserProgress` representa o histórico de conclusão, não substitui `PathStep.status`.
+- Enums fechados por ora, isolados em Python para facilitar expansão futura.
+- `CareerPath.onboarding_response_id` deve ser único.
+- `Payment.provider_payment_id` deve ser único para evitar duplicidade de webhook.
+
 ## Resumo do produto
 
 Career Path AI é uma plataforma SaaS que gera trilhas personalizadas de desenvolvimento de carreira. O usuário informa seu contexto profissional e objetivo principal, e o sistema monta uma trilha em formato de mapa de etapas combinando IA com uma base curada de conteúdo.
@@ -201,7 +217,8 @@ Responsabilidades:
 
 Observação:
 
-- O campo `status` em `PathStep` parece representar estado do passo para o usuário. Em modelagem futura, vale avaliar se parte desse estado deve migrar para uma entidade específica de progresso para evitar mistura entre template da trilha e estado individual de consumo.
+- `PathStep.status` representa o estado operacional atual da etapa para aquela trilha do usuário.
+- `UserProgress` coexistirá como histórico de conclusão e trilha de auditoria de progresso.
 
 ### ContentItem
 
@@ -241,7 +258,8 @@ Responsabilidades:
 
 Observação:
 
-- Para MVP, esse modelo atende. Em iterações futuras, pode ganhar `started_at`, `status`, `notes` ou `evidence_url`.
+- No MVP, funciona como log histórico de conclusão e não como fonte única do estado atual da etapa.
+- Em iterações futuras, pode ganhar `started_at`, `status`, `notes` ou `evidence_url`.
 
 ### Subscription
 
@@ -306,12 +324,12 @@ Responsabilidades:
 ## Relações do domínio
 
 - Um usuário pode ter várias respostas de onboarding.
-- Uma resposta de onboarding pode originar uma trilha.
+- Uma resposta de onboarding origina exatamente uma trilha no MVP.
 - Um usuário pode ter várias trilhas ao longo do tempo.
 - Uma trilha possui várias etapas ordenadas.
 - Uma etapa pode referenciar zero ou um item de conteúdo curado.
 - Um usuário pode ter vários registros de progresso.
-- Um usuário pode ter uma assinatura ativa por vez no MVP.
+- Um usuário pode ter uma assinatura relevante por vez no MVP.
 - Uma assinatura pode ter vários pagamentos.
 - Uma trilha pode ter vários logs de geração ao longo da evolução da solução.
 
@@ -355,29 +373,39 @@ Esses eventos não precisam virar event bus no MVP, mas ajudam a desenhar automa
 - Cada trilha deve ter ordem consistente de etapas.
 - Apenas uma etapa da trilha deve ser marcada como gratuita.
 - `free_step_used` não volta para `false` por gerar nova trilha.
+- `onboarding_response_id` deve ser único em `CareerPath`.
 - Progresso não deve existir para etapa de outra conta sem vínculo legítimo.
 - Assinatura nunca deve depender de armazenamento local de dados de cartão.
+- `provider_payment_id` deve ser único em `Payment` para evitar reprocessamento do mesmo evento financeiro.
 - Webhooks de pagamento só podem alterar estado após validação de assinatura.
 
-## Decisões de modelagem para revisar antes do schema
+## Decisões de modelagem fechadas para o schema inicial
 
-### 1. Estado em `PathStep` versus estado em `UserProgress`
+### 1. Estado em `PathStep` versus histórico em `UserProgress`
 
-Se `PathStep` for persistido como etapa específica da trilha do usuário, o campo `status` faz sentido. Se a plataforma evoluir para separar template da trilha de estado de consumo, talvez o status pertença apenas à camada de progresso.
+`PathStep.status` guarda o estado atual da etapa para a trilha persistida do usuário. `UserProgress` armazena o histórico de conclusão. Os dois coexistem por atenderem responsabilidades diferentes.
 
 ### 2. Cardinalidade entre onboarding e trilha
 
-Hoje o modelo sugere uma trilha por resposta de onboarding. Isso é adequado para o MVP, mas futuras regerações podem exigir versionamento ou múltiplas trilhas derivadas do mesmo onboarding.
+No MVP, cada `OnboardingResponse` gera exatamente um `CareerPath`. Essa regra deve ser reforçada por unicidade de `onboarding_response_id` em `CareerPath`.
 
 ### 3. Assinatura única por usuário
 
-Para o MVP, assumir uma assinatura relevante por usuário reduz complexidade. O histórico continua sendo armazenado via `Subscription` e `Payment`.
+Para o MVP, existe uma assinatura relevante por usuário. O histórico permanece nas tabelas `Subscription` e `Payment`.
 
 ### 4. Enumerações abertas
 
-`goal`, `experience_level`, `plan`, `provider` e `status` devem nascer como enums controlados. Mesmo assim, convém modelar pensando em expansão futura sem quebra de histórico.
+`goal`, `experience_level`, `plan`, `provider` e `status` nascem como enums fechados, definidos em Python e isolados para permitir extensão futura sem espalhar acoplamento.
+
+### 5. Estratégia de identificadores e unicidade
+
+- Todas as entidades principais usam UUID como chave primária.
+- `provider_payment_id` deve ser único para blindar o processamento idempotente de pagamentos.
+- `onboarding_response_id` único em `CareerPath` garante a regra de uma trilha por onboarding.
 
 ## Fronteiras técnicas derivadas do domínio
+
+A organização física do backend seguirá a estrutura obrigatória documentada em [docs/backend-structure.md](docs/backend-structure.md).
 
 ### Backend API
 
@@ -448,7 +476,7 @@ Para o MVP, assumir uma assinatura relevante por usuário reduz complexidade. O 
 Antes de escrever código, a próxima modelagem deveria fechar estes pontos:
 
 1. Definir bounded contexts iniciais do backend.
-2. Traduzir entidades e invariantes para schema relacional.
+2. Revisar o schema existente contra estas invariantes e constraints.
 3. Especificar estados e transições que exigirão validação transacional.
 4. Desenhar os fluxos assíncronos de geração e cobrança.
 5. Escolher o provedor inicial de auth para não duplicar modelagem.

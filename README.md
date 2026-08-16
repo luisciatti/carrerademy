@@ -5,6 +5,8 @@ Documentação inicial do produto e do domínio antes da implementação.
 ## Documentos
 
 - [Visão de domínio](docs/domain-model.md)
+- [Estrutura do backend](docs/backend-structure.md)
+- [Histórico de setup e execução local](docs/historico-setup.md)
 
 ## Stack prevista
 
