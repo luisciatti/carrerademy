@@ -14,4 +14,7 @@ celery_app = Celery(
 celery_app.conf.update(
     task_default_queue="career_path_ai",
     task_track_started=True,
+    imports=("app.tasks.generate_career_path",),
 )
+
+celery_app.autodiscover_tasks(["app.tasks"])

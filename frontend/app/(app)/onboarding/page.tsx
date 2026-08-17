@@ -3,8 +3,18 @@
 import { useRouter } from "next/navigation";
 import { FormEvent, useMemo, useState } from "react";
 
-import { extractApiMessage, useBackendApi } from "@/lib/api";
-import type { GoalType, OnboardingPayload } from "@/lib/types";
+import { extractOnboardingSubmitMessage, useBackendApi } from "@/lib/api";
+import type { CareerType, GoalType, OnboardingPayload } from "@/lib/types";
+
+const CAREER_TYPE_OPTIONS: Array<{ value: CareerType; label: string; description: string }> = [
+    { value: "TECH", label: "Tecnologia", description: "Engenharia, dados, cloud, produto tecnico." },
+    { value: "DESIGN", label: "Design", description: "UX, UI, produto, design visual." },
+    { value: "MARKETING", label: "Marketing", description: "Conteudo, growth, midia, marca." },
+    { value: "SALES", label: "Vendas", description: "Inside sales, account exec, revenue." },
+    { value: "FINANCE", label: "Financas", description: "FP&A, controladoria, analise financeira." },
+    { value: "OPERATIONS", label: "Operacoes", description: "Processos, projetos, eficiencia." },
+    { value: "OTHER", label: "Outro", description: "Area diferente das opcoes acima." },
+];
 
 const GOAL_OPTIONS: Array<{ value: GoalType; label: string; description: string }> = [
     { value: "GROW_CURRENT_JOB", label: "Crescer no emprego atual", description: "Subir de nivel e ganhar mais impacto onde voce ja esta." },
@@ -27,12 +37,13 @@ export default function OnboardingPage() {
     const [form, setForm] = useState<OnboardingPayload>({
         current_job: "",
         dream_job: "",
+        career_type: "TECH",
         goal: "GROW_CURRENT_JOB",
         experience_level: "Iniciante",
         weekly_time_availability: 5,
     });
 
-    const progress = useMemo(() => ((step + 1) / 5) * 100, [step]);
+    const progress = useMemo(() => ((step + 1) / 6) * 100, [step]);
 
     function next() {
         if (step === 0 && form.current_job.trim().length < 2) {
@@ -41,7 +52,7 @@ export default function OnboardingPage() {
         }
 
         setError(null);
-        setStep((prev) => Math.min(prev + 1, 4));
+        setStep((prev) => Math.min(prev + 1, 5));
     }
 
     function previous() {
@@ -65,10 +76,10 @@ export default function OnboardingPage() {
                 ...form,
                 dream_job: form.dream_job?.trim() ? form.dream_job.trim() : null,
             };
-            const response = await api.createOnboarding(payload);
-            router.push(`/trilha/gerando?career_path_id=${response.career_path_id}`);
+            await api.createOnboarding(payload);
+            router.push("/trilha/escolha");
         } catch (e) {
-            setError(extractApiMessage(e, "Nao foi possivel enviar seu onboarding."));
+            setError(extractOnboardingSubmitMessage(e));
         } finally {
             setSubmitting(false);
         }
@@ -80,7 +91,7 @@ export default function OnboardingPage() {
                 <p className="text-xs uppercase tracking-widest text-zinc-500">Onboarding</p>
                 <h1 className="mt-2 text-2xl font-black text-zinc-100">Vamos desenhar sua trilha personalizada</h1>
                 <div className="mt-4 h-2 w-full rounded bg-zinc-800">
-                    <div className="h-full rounded bg-violet-500 transition-all" style={{ width: `${progress}%` }} />
+                    <div className="h-full rounded bg-teal-500 transition-all" style={{ width: `${progress}%` }} />
                 </div>
             </div>
 
@@ -88,7 +99,7 @@ export default function OnboardingPage() {
                 <section>
                     <label className="text-sm text-zinc-300">Qual e seu emprego atual?</label>
                     <input
-                        className="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-zinc-100 outline-none focus:border-violet-400"
+                        className="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-zinc-100 outline-none focus:border-teal-400"
                         value={form.current_job}
                         onChange={(e) => setForm((prev) => ({ ...prev, current_job: e.target.value }))}
                         placeholder="Ex: Analista de suporte"
@@ -97,10 +108,29 @@ export default function OnboardingPage() {
             )}
 
             {step === 1 && (
+                <section className="grid gap-3 md:grid-cols-2">
+                    {CAREER_TYPE_OPTIONS.map((option) => {
+                        const active = form.career_type === option.value;
+                        return (
+                            <button
+                                type="button"
+                                key={option.value}
+                                onClick={() => setForm((prev) => ({ ...prev, career_type: option.value }))}
+                                className={`rounded-xl border p-4 text-left transition ${active ? "border-teal-400 bg-teal-600/20" : "border-zinc-700 bg-zinc-900 hover:border-teal-500/60"}`}
+                            >
+                                <p className="font-semibold text-zinc-100">{option.label}</p>
+                                <p className="mt-1 text-sm text-zinc-400">{option.description}</p>
+                            </button>
+                        );
+                    })}
+                </section>
+            )}
+
+            {step === 2 && (
                 <section>
                     <label className="text-sm text-zinc-300">Qual e seu emprego dos sonhos? (opcional)</label>
                     <input
-                        className="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-zinc-100 outline-none focus:border-violet-400"
+                        className="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-zinc-100 outline-none focus:border-teal-400"
                         value={form.dream_job ?? ""}
                         onChange={(e) => setForm((prev) => ({ ...prev, dream_job: e.target.value }))}
                         placeholder="Ex: Cloud Engineer"
@@ -111,14 +141,14 @@ export default function OnboardingPage() {
                             setForm((prev) => ({ ...prev, dream_job: "" }));
                             next();
                         }}
-                        className="mt-3 text-sm text-violet-300 hover:text-violet-200"
+                        className="mt-3 text-sm text-teal-300 hover:text-teal-200"
                     >
                         Pular essa pergunta
                     </button>
                 </section>
             )}
 
-            {step === 2 && (
+            {step === 3 && (
                 <section className="grid gap-3 md:grid-cols-2">
                     {GOAL_OPTIONS.map((option) => {
                         const active = form.goal === option.value;
@@ -127,7 +157,7 @@ export default function OnboardingPage() {
                                 type="button"
                                 key={option.value}
                                 onClick={() => setForm((prev) => ({ ...prev, goal: option.value }))}
-                                className={`rounded-xl border p-4 text-left transition ${active ? "border-violet-400 bg-violet-600/20" : "border-zinc-700 bg-zinc-900 hover:border-violet-500/60"}`}
+                                className={`rounded-xl border p-4 text-left transition ${active ? "border-teal-400 bg-teal-600/20" : "border-zinc-700 bg-zinc-900 hover:border-teal-500/60"}`}
                             >
                                 <p className="font-semibold text-zinc-100">{option.label}</p>
                                 <p className="mt-1 text-sm text-zinc-400">{option.description}</p>
@@ -137,7 +167,7 @@ export default function OnboardingPage() {
                 </section>
             )}
 
-            {step === 3 && (
+            {step === 4 && (
                 <section className="grid gap-3 md:grid-cols-3">
                     {EXPERIENCE_OPTIONS.map((level) => {
                         const active = form.experience_level === level;
@@ -146,7 +176,7 @@ export default function OnboardingPage() {
                                 type="button"
                                 key={level}
                                 onClick={() => setForm((prev) => ({ ...prev, experience_level: level }))}
-                                className={`rounded-xl border px-4 py-3 text-sm font-semibold transition ${active ? "border-violet-400 bg-violet-600/20 text-violet-100" : "border-zinc-700 bg-zinc-900 text-zinc-300 hover:border-violet-500/60"}`}
+                                className={`rounded-xl border px-4 py-3 text-sm font-semibold transition ${active ? "border-teal-400 bg-teal-600/20 text-teal-100" : "border-zinc-700 bg-zinc-900 text-zinc-300 hover:border-teal-500/60"}`}
                             >
                                 {level}
                             </button>
@@ -155,7 +185,7 @@ export default function OnboardingPage() {
                 </section>
             )}
 
-            {step === 4 && (
+            {step === 5 && (
                 <section>
                     <label className="text-sm text-zinc-300">Quanto tempo por semana voce tem para estudar?</label>
                     <div className="mt-3 grid gap-3 sm:grid-cols-3">
@@ -166,7 +196,7 @@ export default function OnboardingPage() {
                                     type="button"
                                     key={hours}
                                     onClick={() => setForm((prev) => ({ ...prev, weekly_time_availability: hours }))}
-                                    className={`rounded-xl border px-4 py-3 text-sm font-semibold transition ${active ? "border-violet-400 bg-violet-600/20 text-violet-100" : "border-zinc-700 bg-zinc-900 text-zinc-300 hover:border-violet-500/60"}`}
+                                    className={`rounded-xl border px-4 py-3 text-sm font-semibold transition ${active ? "border-teal-400 bg-teal-600/20 text-teal-100" : "border-zinc-700 bg-zinc-900 text-zinc-300 hover:border-teal-500/60"}`}
                                 >
                                     {hours}h / semana
                                 </button>
@@ -188,17 +218,17 @@ export default function OnboardingPage() {
                     Voltar
                 </button>
 
-                {step < 4 ? (
-                    <button type="button" onClick={next} className="rounded-lg bg-violet-500 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-400">
+                {step < 5 ? (
+                    <button type="button" onClick={next} className="rounded-lg bg-teal-500 px-4 py-2 text-sm font-semibold text-zinc-950 hover:bg-teal-400">
                         Continuar
                     </button>
                 ) : (
                     <button
                         type="submit"
                         disabled={submitting}
-                        className="rounded-lg bg-violet-500 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-400 disabled:opacity-60"
+                        className="rounded-lg bg-teal-500 px-4 py-2 text-sm font-semibold text-zinc-950 hover:bg-teal-400 disabled:opacity-60"
                     >
-                        {submitting ? "Enviando..." : "Gerar minha trilha"}
+                        {submitting ? "Criando seus caminhos..." : "Criar meus caminhos"}
                     </button>
                 )}
             </footer>

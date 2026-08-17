@@ -1,9 +1,8 @@
 "use client";
 
-import { useAuth } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
+import { useCallback } from "react";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const API_BASE_URL = "/api/backend";
 
 type ApiFetchOptions = RequestInit & {
     token?: string | null;
@@ -22,18 +21,16 @@ export class ApiError extends Error {
 }
 
 export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): Promise<T> {
-    const { token, headers, ...rest } = options;
+    const { headers, ...rest } = options;
 
     const mergedHeaders = new Headers(headers ?? {});
     mergedHeaders.set("Accept", "application/json");
     if (!(rest.body instanceof FormData)) {
         mergedHeaders.set("Content-Type", "application/json");
     }
-    if (token) {
-        mergedHeaders.set("Authorization", `Bearer ${token}`);
-    }
 
-    const response = await fetch(`${API_BASE_URL}${path}`, {
+    const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+    const response = await fetch(`${API_BASE_URL}${normalizedPath}`, {
         ...rest,
         headers: mergedHeaders,
         cache: "no-store",
@@ -59,20 +56,9 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
 }
 
 export function useApiClient() {
-    const { getToken } = useAuth();
-    const router = useRouter();
-
-    return async function authenticatedFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
-        const token = await getToken();
-        try {
-            return await apiFetch<T>(path, { ...options, token });
-        } catch (error) {
-            if (error instanceof ApiError && error.status === 401) {
-                router.push("/sign-in");
-            }
-            throw error;
-        }
-    };
+    return useCallback(async function authenticatedFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
+        return apiFetch<T>(path, { ...options });
+    }, []);
 }
 
 export function getApiBaseUrl() {

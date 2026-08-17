@@ -1,4 +1,4 @@
-from app.schemas.onboarding import CareerPathView, PublicPathStep
+from app.schemas.onboarding import CareerPathView, ContentStageView, PublicPathStep
 
 
-__all__ = ["CareerPathView", "PublicPathStep"]
+__all__ = ["CareerPathView", "ContentStageView", "PublicPathStep"]

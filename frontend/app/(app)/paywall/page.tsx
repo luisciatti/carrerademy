@@ -16,9 +16,9 @@ export default function PaywallPage() {
 
         async function load() {
             try {
-                const result = await api.getMyCareerPath();
+                const result = await api.getMyCareerPaths();
                 if (!cancelled) {
-                    setPath(result);
+                    setPath(result.find((item) => item.kind === "AI_PERSONALIZED") ?? null);
                 }
             } catch (e) {
                 if (!cancelled) {
@@ -41,8 +41,8 @@ export default function PaywallPage() {
     }, [path]);
 
     return (
-        <div className="mx-auto max-w-3xl rounded-3xl border border-violet-900/40 bg-zinc-950/70 p-8">
-            <p className="text-xs uppercase tracking-widest text-violet-300">Acesso premium</p>
+        <div className="mx-auto max-w-3xl rounded-3xl border border-teal-900/40 bg-zinc-950/70 p-8">
+            <p className="text-xs uppercase tracking-widest text-teal-300">Acesso premium</p>
             <h1 className="mt-2 text-3xl font-black text-zinc-100">Voce concluiu sua primeira etapa!</h1>
             <p className="mt-3 text-zinc-300">Desbloqueie o restante da sua trilha personalizada para acelerar sua evolucao.</p>
 
@@ -62,8 +62,8 @@ export default function PaywallPage() {
             </div>
 
             <div className="mt-8 flex flex-wrap gap-3">
-                <button className="rounded-lg bg-violet-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-violet-400">Assinar (em breve)</button>
-                <a href="/trilha" className="rounded-lg border border-zinc-700 px-5 py-2.5 text-sm font-semibold text-zinc-200 hover:border-violet-400">
+                <button className="rounded-lg bg-teal-500 px-5 py-2.5 text-sm font-semibold text-zinc-950 hover:bg-teal-400">Assinar (em breve)</button>
+                <a href="/trilha?kind=AI_PERSONALIZED" className="rounded-lg border border-zinc-700 px-5 py-2.5 text-sm font-semibold text-zinc-200 hover:border-teal-400">
                     Voltar para trilha
                 </a>
             </div>

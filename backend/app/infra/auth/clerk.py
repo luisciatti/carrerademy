@@ -18,17 +18,28 @@ class ClerkJWTVerifier:
         self._jwks_cached_at = 0.0
         self._lock = threading.Lock()
 
-    def _jwks_url(self) -> str:
+    def _jwks_url(self, issuer: str | None) -> str:
         if self._settings.clerk_jwks_url:
             return self._settings.clerk_jwks_url
 
-        issuer = (self._settings.clerk_issuer or "").rstrip("/")
-        if not issuer:
-            raise ValueError("CLERK_ISSUER or CLERK_JWKS_URL must be configured.")
+        normalized_issuer = (issuer or self._settings.clerk_issuer or "").rstrip("/")
+        if not normalized_issuer:
+            raise ValueError("Unable to resolve Clerk issuer from settings or token.")
 
-        return f"{issuer}/.well-known/jwks.json"
+        return f"{normalized_issuer}/.well-known/jwks.json"
 
-    def _load_jwks(self) -> dict[str, Any]:
+    def _get_unverified_claims(self, token: str) -> dict[str, Any]:
+        try:
+            claims = jwt.decode(token, options={"verify_signature": False, "verify_aud": False, "verify_exp": False})
+        except jwt.InvalidTokenError as exc:
+            raise ValueError("Invalid Clerk token.") from exc
+
+        if not isinstance(claims, dict):
+            raise ValueError("Invalid Clerk token claims.")
+
+        return claims
+
+    def _load_jwks(self, issuer: str | None) -> dict[str, Any]:
         ttl = max(60, self._settings.clerk_jwks_cache_ttl_seconds)
         now = time.time()
 
@@ -37,20 +48,20 @@ class ClerkJWTVerifier:
                 return self._jwks_cache
 
             with httpx.Client(timeout=5.0) as client:
-                response = client.get(self._jwks_url())
+                response = client.get(self._jwks_url(issuer))
                 response.raise_for_status()
                 self._jwks_cache = response.json()
                 self._jwks_cached_at = now
 
             return self._jwks_cache
 
-    def _find_public_key(self, token: str) -> Any:
+    def _find_public_key(self, token: str, issuer: str | None) -> Any:
         unverified_header = jwt.get_unverified_header(token)
         kid = unverified_header.get("kid")
         if not kid:
             raise ValueError("Token header missing key id.")
 
-        jwks = self._load_jwks()
+        jwks = self._load_jwks(issuer)
         keys = jwks.get("keys", [])
 
         key_data = next((key for key in keys if key.get("kid") == kid), None)
@@ -60,12 +71,13 @@ class ClerkJWTVerifier:
         return jwt.algorithms.RSAAlgorithm.from_jwk(json.dumps(key_data))
 
     def verify_token(self, token: str) -> dict[str, Any]:
-        issuer = self._settings.clerk_issuer
+        unverified_claims = self._get_unverified_claims(token)
+        issuer = str(unverified_claims.get("iss") or self._settings.clerk_issuer or "").strip()
         if not issuer:
-            raise ValueError("CLERK_ISSUER must be configured.")
+            raise ValueError("Unable to resolve Clerk issuer from token.")
 
         try:
-            public_key = self._find_public_key(token)
+            public_key = self._find_public_key(token, issuer)
             claims = jwt.decode(
                 token,
                 key=public_key,

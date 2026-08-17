@@ -1,11 +1,11 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, Enum as SQLEnum, ForeignKey, Integer, Numeric, String, Text, UniqueConstraint, func
+from sqlalchemy import JSON, Boolean, DateTime, Enum as SQLEnum, ForeignKey, Integer, Numeric, String, Text, UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.domain.enums import CareerPathStatus, ContentItemType, GoalType, PathStepStatus, PaymentProvider, PaymentStatus, SubscriptionPlan, SubscriptionStatus
+from app.domain.enums import CareerPathKind, CareerPathStatus, CareerType, ContentItemType, GoalType, PathStepStatus, PaymentProvider, PaymentStatus, SubscriptionPlan, SubscriptionStatus
 from app.infra.db.base import Base
 
 
@@ -35,13 +35,14 @@ class OnboardingResponse(Base):
     user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     current_job: Mapped[str] = mapped_column(String(255), nullable=False)
     dream_job: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    career_type: Mapped[CareerType] = mapped_column(SQLEnum(CareerType, name="career_type"), nullable=False)
     goal: Mapped[GoalType] = mapped_column(SQLEnum(GoalType, name="goal_type"), nullable=False)
     experience_level: Mapped[str] = mapped_column(String(100), nullable=False)
     weekly_time_availability: Mapped[int] = mapped_column(Integer, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     user: Mapped[User] = relationship(back_populates="onboarding_responses")
-    career_path: Mapped["CareerPath | None"] = relationship(back_populates="onboarding_response")
+    career_paths: Mapped[list["CareerPath"]] = relationship(back_populates="onboarding_response", cascade="all, delete-orphan")
 
 
 class CareerPath(Base):
@@ -53,10 +54,10 @@ class CareerPath(Base):
         UUID(as_uuid=True),
         ForeignKey("onboarding_responses.id", ondelete="CASCADE"),
         nullable=False,
-        unique=True,
         index=True,
     )
     title: Mapped[str] = mapped_column(String(255), nullable=False)
+    kind: Mapped[CareerPathKind] = mapped_column(SQLEnum(CareerPathKind, name="career_path_kind"), nullable=False)
     generated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     status: Mapped[CareerPathStatus] = mapped_column(
         SQLEnum(CareerPathStatus, name="career_path_status"),
@@ -65,7 +66,7 @@ class CareerPath(Base):
     )
 
     user: Mapped[User] = relationship(back_populates="career_paths")
-    onboarding_response: Mapped[OnboardingResponse] = relationship(back_populates="career_path")
+    onboarding_response: Mapped[OnboardingResponse] = relationship(back_populates="career_paths")
     steps: Mapped[list["PathStep"]] = relationship(
         back_populates="career_path",
         cascade="all, delete-orphan",
@@ -82,10 +83,20 @@ class ContentItem(Base):
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
     external_url: Mapped[str | None] = mapped_column(String(2048), nullable=True)
+    video_url: Mapped[str | None] = mapped_column(String(2048), nullable=True)
+    quiz_schema: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    diagram_url: Mapped[str | None] = mapped_column(String(2048), nullable=True)
+    form_schema: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    scenario_schema: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    rules_schema: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    matching_schema: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    dialogue_schema: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    follow_up_content_item_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("content_items.id", ondelete="SET NULL"), nullable=True)
     tags: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=False, default=list)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
     path_steps: Mapped[list["PathStep"]] = relationship(back_populates="content_item")
+    follow_up_content_item: Mapped["ContentItem | None"] = relationship(remote_side="ContentItem.id", foreign_keys=[follow_up_content_item_id])
 
 
 class PathStep(Base):
@@ -117,10 +128,12 @@ class UserProgress(Base):
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     path_step_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("path_steps.id", ondelete="CASCADE"), nullable=False, index=True)
-    completed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    current_content_item_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("content_items.id", ondelete="SET NULL"), nullable=True)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     user: Mapped[User] = relationship(back_populates="progress_logs")
     path_step: Mapped[PathStep] = relationship(back_populates="progress_logs")
+    current_content_item: Mapped["ContentItem | None"] = relationship(foreign_keys=[current_content_item_id])
 
 
 class Subscription(Base):

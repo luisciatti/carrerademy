@@ -15,9 +15,11 @@ def create_onboarding(
 	db: Session = Depends(get_db),
 	current_user: User = Depends(get_current_user),
 ) -> OnboardingCreateResponse:
-	career_path = create_onboarding_and_generate_path(db=db, current_user=current_user, payload=payload)
+	standard_path, ai_path = create_onboarding_and_generate_path(db=db, current_user=current_user, payload=payload)
 	return OnboardingCreateResponse(
-		career_path_id=career_path.id,
-		status=career_path.status.value,
-		message="Onboarding recebido. Estamos gerando sua trilha.",
+		standard_career_path_id=standard_path.id,
+		ai_career_path_id=ai_path.id,
+		standard_status=standard_path.status.value,
+		ai_status=ai_path.status.value,
+		message="Onboarding recebido. Sua trilha de soft skills ja esta pronta e a trilha personalizada esta sendo gerada.",
 	)

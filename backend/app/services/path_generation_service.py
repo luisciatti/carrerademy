@@ -3,11 +3,12 @@ from __future__ import annotations
 import json
 import math
 import uuid
+from collections import defaultdict
 from decimal import Decimal
 
 from sqlalchemy import select
 
-from app.domain.enums import CareerPathStatus, GoalType, PathStepStatus
+from app.domain.enums import CareerPathStatus, ContentItemType, GoalType, PathStepStatus
 from app.domain.models import AIGenerationLog, CareerPath, ContentItem, OnboardingResponse, PathStep
 from app.infra.ai_provider.client import AIProviderClient
 from app.infra.db.session import SessionLocal
@@ -19,6 +20,13 @@ _GOAL_TAG_HINTS: dict[GoalType, set[str]] = {
     GoalType.FIND_JOB_ABROAD: {"english", "international", "remote", "visa", "global"},
     GoalType.MOVE_ABROAD: {"relocation", "visa", "culture", "international", "planning"},
 }
+
+_RICH_CONTENT_TYPES = (
+    ContentItemType.VIDEO,
+    ContentItemType.QUIZ,
+    ContentItemType.DIAGRAM,
+    ContentItemType.INTERACTIVE_FORM,
+)
 
 
 def generate_career_path(career_path_id: uuid.UUID) -> None:
@@ -45,6 +53,8 @@ def generate_career_path(career_path_id: uuid.UUID) -> None:
         created_steps = _to_steps(career_path_id=career_path.id, structured=structured, candidates=candidates)
         if not created_steps:
             created_steps = _fallback_steps(career_path.id, candidates)
+
+        created_steps = _ensure_variety(created_steps=created_steps, candidates=candidates, career_path_id=career_path.id, onboarding=onboarding)
 
         for step in created_steps:
             db.add(step)
@@ -79,10 +89,20 @@ def _select_content_candidates(db, goal: GoalType) -> list[ContentItem]:
     def score(item: ContentItem) -> tuple[int, int]:
         tags = {tag.lower() for tag in item.tags}
         overlap = len(tags.intersection(goal_tags))
-        return overlap, len(tags)
+        rich_bonus = 1 if item.type in _RICH_CONTENT_TYPES else 0
+        return overlap, rich_bonus, len(tags)
 
     ranked = sorted(active_items, key=score, reverse=True)
-    return ranked[:12]
+    rich_items = [item for item in ranked if item.type in _RICH_CONTENT_TYPES][:6]
+    other_items = [item for item in ranked if item.type not in _RICH_CONTENT_TYPES][:8]
+    merged: list[ContentItem] = []
+    seen_ids: set[uuid.UUID] = set()
+    for item in [*rich_items, *other_items]:
+        if item.id in seen_ids:
+            continue
+        seen_ids.add(item.id)
+        merged.append(item)
+    return merged[:14]
 
 
 def _build_generation_prompt(onboarding: OnboardingResponse, candidates: list[ContentItem]) -> str:
@@ -94,6 +114,10 @@ def _build_generation_prompt(onboarding: OnboardingResponse, candidates: list[Co
             "type": item.type.value,
             "tags": item.tags,
             "external_url": item.external_url,
+			"video_url": item.video_url,
+			"diagram_url": item.diagram_url,
+			"has_quiz": item.quiz_schema is not None,
+			"has_form": item.form_schema is not None,
         }
         for item in candidates
     ]
@@ -112,9 +136,10 @@ def _build_generation_prompt(onboarding: OnboardingResponse, candidates: list[Co
         "Rules:\n"
         "1) Do not invent external learning items.\n"
         "2) Select and order steps only from provided candidates.\n"
-        "3) Return only valid JSON.\n"
+        "3) Prefer a varied path, mixing passive and active content.\n"
+        "4) Return only valid JSON.\n"
         "JSON format:\n"
-        '{"title":"string","steps":[{"content_item_id":"uuid","title":"string","description":"string"}]}\n\n'
+        '{"title":"string","steps":[{"content_item_id":"uuid","title":"string","description":"1-2 short sentences explaining why this step comes now for this user"}]}\n\n'
         f"ONBOARDING_JSON_START\n{json.dumps(onboarding_payload, ensure_ascii=True)}\nONBOARDING_JSON_END\n\n"
         f"CANDIDATES_JSON_START\n{json.dumps(candidate_payload, ensure_ascii=True)}\nCANDIDATES_JSON_END\n"
     )
@@ -185,7 +210,7 @@ def _to_steps(career_path_id: uuid.UUID, structured: dict, candidates: list[Cont
 
 
 def _fallback_steps(career_path_id: uuid.UUID, candidates: list[ContentItem]) -> list[PathStep]:
-    fallback_items = candidates[:5]
+    fallback_items = candidates[:6]
     steps: list[PathStep] = []
     for idx, item in enumerate(fallback_items):
         steps.append(
@@ -193,7 +218,7 @@ def _fallback_steps(career_path_id: uuid.UUID, candidates: list[ContentItem]) ->
                 career_path_id=career_path_id,
                 order_index=idx,
                 title=item.title,
-                description=item.description,
+                description=_default_step_context(item=item, order_index=idx),
                 content_reference_id=item.id,
                 is_free=idx == 0,
                 status=PathStepStatus.UNLOCKED if idx == 0 else PathStepStatus.LOCKED,
@@ -201,6 +226,79 @@ def _fallback_steps(career_path_id: uuid.UUID, candidates: list[ContentItem]) ->
         )
 
     return steps
+
+
+def _ensure_variety(*, created_steps: list[PathStep], candidates: list[ContentItem], career_path_id: uuid.UUID, onboarding: OnboardingResponse) -> list[PathStep]:
+    if not created_steps:
+        return created_steps
+
+    candidate_map = {item.id: item for item in candidates}
+    selected_ids = {step.content_reference_id for step in created_steps if step.content_reference_id is not None}
+    rich_types_present = {
+        candidate_map[step.content_reference_id].type
+        for step in created_steps
+        if step.content_reference_id in candidate_map and candidate_map[step.content_reference_id].type in _RICH_CONTENT_TYPES
+    }
+
+    if len(rich_types_present) >= 2:
+        return _reindex_steps(created_steps)
+
+    by_type: dict[ContentItemType, list[ContentItem]] = defaultdict(list)
+    for candidate in candidates:
+        by_type[candidate.type].append(candidate)
+
+    replacements: list[ContentItem] = []
+    for rich_type in _RICH_CONTENT_TYPES:
+        if rich_type in rich_types_present:
+            continue
+        for candidate in by_type.get(rich_type, []):
+            if candidate.id not in selected_ids:
+                replacements.append(candidate)
+                selected_ids.add(candidate.id)
+                break
+        if len(rich_types_present) + len(replacements) >= 2:
+            break
+
+    for replacement in replacements:
+        replace_index = next((index for index, step in enumerate(created_steps[1:], start=1) if step.content_reference_id is not None and candidate_map.get(step.content_reference_id, replacement).type not in _RICH_CONTENT_TYPES), None)
+        new_step = PathStep(
+            career_path_id=career_path_id,
+            order_index=replace_index if replace_index is not None else len(created_steps),
+            title=replacement.title,
+            description=_default_step_context(item=replacement, order_index=replace_index or len(created_steps), onboarding=onboarding),
+            content_reference_id=replacement.id,
+            is_free=False,
+            status=PathStepStatus.LOCKED,
+        )
+
+        if replace_index is None:
+            created_steps.append(new_step)
+        else:
+            created_steps[replace_index] = new_step
+
+    return _reindex_steps(created_steps)
+
+
+def _reindex_steps(steps: list[PathStep]) -> list[PathStep]:
+    for idx, step in enumerate(steps):
+        step.order_index = idx
+        step.is_free = idx == 0
+        if idx == 0 and step.status == PathStepStatus.LOCKED:
+            step.status = PathStepStatus.UNLOCKED
+    return steps
+
+
+def _default_step_context(*, item: ContentItem, order_index: int, onboarding: OnboardingResponse | None = None) -> str:
+    goal_text = onboarding.goal.value.replace("_", " ").lower() if onboarding is not None else "seu objetivo"
+    if item.type == ContentItemType.VIDEO:
+        return f"Comece com um video rapido para ganhar contexto pratico antes das proximas etapas focadas em {goal_text}."
+    if item.type == ContentItemType.QUIZ:
+        return "Use este quiz para testar sua base atual e identificar rapidamente o que precisa de reforco."
+    if item.type == ContentItemType.DIAGRAM:
+        return "Visualize o mapa completo desta etapa para entender a jornada antes de executar as acoes seguintes."
+    if item.type == ContentItemType.INTERACTIVE_FORM:
+        return "Preencha este exercicio para transformar aprendizado passivo em um artefato util para sua carreira."
+    return f"Etapa {order_index + 1} pensada para avancar com consistencia rumo a {goal_text}."
 
 
 def _estimate_tokens(text: str) -> int:

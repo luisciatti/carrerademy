@@ -29,19 +29,25 @@ export default function TrailGeneratingPage() {
 
         async function checkStatus() {
             try {
-                const result = await api.getMyCareerPath();
+                const result = await api.getMyCareerPaths();
                 if (cancelled) {
                     return;
                 }
 
-                if (expectedCareerPathId && result.id !== expectedCareerPathId) {
+                const aiPath = result.find((path) => path.kind === "AI_PERSONALIZED");
+                if (!aiPath) {
+                    router.replace("/dashboard");
                     return;
                 }
 
-                setPath(result);
+                if (expectedCareerPathId && aiPath.id !== expectedCareerPathId) {
+                    return;
+                }
 
-                if (result.status === "ACTIVE") {
-                    router.replace("/trilha");
+                setPath(aiPath);
+
+                if (aiPath.status === "ACTIVE") {
+                    router.replace("/trilha?kind=AI_PERSONALIZED");
                 }
             } catch (e) {
                 if (cancelled) {
@@ -81,8 +87,8 @@ export default function TrailGeneratingPage() {
     }, [api, expectedCareerPathId, router]);
 
     return (
-        <div className="mx-auto flex min-h-[60vh] max-w-2xl flex-col items-center justify-center rounded-3xl border border-violet-900/40 bg-zinc-950/70 p-8 text-center">
-            <div className="h-12 w-12 animate-spin rounded-full border-2 border-violet-400 border-t-transparent" />
+        <div className="mx-auto flex min-h-[60vh] max-w-2xl flex-col items-center justify-center rounded-3xl border border-teal-900/40 bg-zinc-950/70 p-8 text-center">
+            <div className="h-12 w-12 animate-spin rounded-full border-2 border-teal-400 border-t-transparent" />
             <h1 className="mt-6 text-2xl font-black text-zinc-100">Montando sua trilha personalizada...</h1>
             <p className="mt-2 text-sm text-zinc-400">Estamos organizando a melhor sequencia de estudo com base no seu objetivo.</p>
 

@@ -10,10 +10,34 @@ import type { CareerPath } from "@/lib/types";
 type GuardState = "checking" | "ready";
 
 export function AppRouteGuard({ children }: { children: React.ReactNode }) {
-    const { isLoaded, isSignedIn, getToken } = useAuth();
+    const { isLoaded, isSignedIn, getToken, userId } = useAuth();
     const pathname = usePathname();
+
+    if (!isLoaded) {
+        return <GuardLoading />;
+    }
+
+    return (
+        <GuardRuntime key={`${userId ?? "anon"}:${pathname}`} pathname={pathname} isSignedIn={isSignedIn} getToken={getToken}>
+            {children}
+        </GuardRuntime>
+    );
+}
+
+function GuardRuntime({
+    children,
+    pathname,
+    isSignedIn,
+    getToken,
+}: {
+    children: React.ReactNode;
+    pathname: string;
+    isSignedIn: boolean | undefined;
+    getToken: () => Promise<string | null>;
+}) {
     const router = useRouter();
     const [state, setState] = useState<GuardState>("checking");
+    const [authError, setAuthError] = useState<string | null>(null);
 
     const isPublicWithinApp = useMemo(() => pathname.startsWith("/paywall"), [pathname]);
 
@@ -21,29 +45,34 @@ export function AppRouteGuard({ children }: { children: React.ReactNode }) {
         let cancelled = false;
 
         async function runGuard() {
-            if (!isLoaded) {
-                return;
-            }
-
             if (!isSignedIn) {
                 router.replace("/sign-in");
                 return;
             }
 
+            setAuthError(null);
+
             try {
-                const token = await getToken();
-                const careerPath = await apiFetch<CareerPath>("/api/v1/career-paths/me", { token });
+                const careerPaths = await apiFetch<CareerPath[]>("/api/v1/career-paths/me");
 
                 if (cancelled) {
                     return;
                 }
 
-                if (careerPath.status === "GENERATING" && pathname !== "/trilha/gerando") {
-                    router.replace("/trilha/gerando");
+                const hasAnyPath = careerPaths.length > 0;
+                const aiPath = careerPaths.find((path) => path.kind === "AI_PERSONALIZED");
+
+                if (!hasAnyPath && pathname !== "/onboarding") {
+                    router.replace("/onboarding");
                     return;
                 }
 
-                if (careerPath.status === "ACTIVE" && (pathname === "/onboarding" || pathname === "/trilha/gerando" || pathname === "/")) {
+                if (pathname === "/trilha/gerando" && aiPath?.status === "ACTIVE") {
+                    router.replace("/trilha?kind=AI_PERSONALIZED");
+                    return;
+                }
+
+                if (hasAnyPath && pathname === "/onboarding") {
                     router.replace("/dashboard");
                     return;
                 }
@@ -58,7 +87,8 @@ export function AppRouteGuard({ children }: { children: React.ReactNode }) {
                         return;
                     }
                 } else if (error instanceof ApiError && error.status === 401) {
-                    router.replace("/sign-in");
+                    setAuthError("Sua sessao no Clerk existe, mas o backend nao conseguiu validar o token. Recarregue a pagina apos reiniciar o backend.");
+                    setState("ready");
                     return;
                 }
             }
@@ -73,20 +103,35 @@ export function AppRouteGuard({ children }: { children: React.ReactNode }) {
         return () => {
             cancelled = true;
         };
-    }, [getToken, isLoaded, isPublicWithinApp, isSignedIn, pathname, router]);
+    }, [getToken, isPublicWithinApp, isSignedIn, pathname, router]);
 
     if (state === "checking") {
+        return <GuardLoading />;
+    }
+
+    if (authError) {
         return (
             <div className="flex min-h-[60vh] items-center justify-center">
-                <div className="w-full max-w-xl rounded-2xl border border-violet-900/40 bg-zinc-950/80 p-8">
-                    <p className="text-sm text-zinc-300">Carregando seu espaco de aprendizado...</p>
-                    <div className="mt-4 h-2 w-full overflow-hidden rounded bg-zinc-800">
-                        <div className="h-full w-1/2 animate-pulse rounded bg-violet-500" />
-                    </div>
+                <div className="w-full max-w-2xl rounded-2xl border border-amber-900/50 bg-zinc-950/90 p-8">
+                    <h2 className="text-lg font-semibold text-amber-200">Falha de autenticacao com o backend</h2>
+                    <p className="mt-3 text-sm text-zinc-300">{authError}</p>
                 </div>
             </div>
         );
     }
 
     return <>{children}</>;
+}
+
+function GuardLoading() {
+    return (
+        <div className="flex min-h-[60vh] items-center justify-center">
+            <div className="w-full max-w-xl rounded-2xl border border-teal-900/40 bg-zinc-950/80 p-8">
+                <p className="text-sm text-zinc-300">Carregando seu espaco de aprendizado...</p>
+                <div className="mt-4 h-2 w-full overflow-hidden rounded bg-zinc-800">
+                    <div className="h-full w-1/2 animate-pulse rounded bg-teal-500" />
+                </div>
+            </div>
+        </div>
+    );
 }
