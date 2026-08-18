@@ -80,7 +80,7 @@ export default function EscolhaTrilhaPage() {
                         Conteudo liberado para sempre com video no YouTube, reflexoes e mini-jogos práticos.
                     </p>
                     <p className="mt-3 text-sm text-zinc-400">{standardPath?.title ?? "Pronta para iniciar"}</p>
-                    <Link href="/trilha?kind=STANDARD_SOFT_SKILLS" className="mt-5 inline-flex rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-zinc-950 hover:bg-emerald-400">
+                    <Link href={standardPath ? `/trilha/${standardPath.id}` : "/constelacao"} className="mt-5 inline-flex rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-zinc-950 hover:bg-emerald-400">
                         Entrar na Always Free
                     </Link>
                 </article>
@@ -97,7 +97,7 @@ export default function EscolhaTrilhaPage() {
                         {aiPath?.status === "GENERATING" ? "Estamos montando sua trilha agora." : aiPath?.title ?? "Aguardando disponibilidade"}
                     </p>
                     <Link
-                        href={aiPath?.status === "GENERATING" ? "/trilha/gerando" : "/trilha?kind=AI_PERSONALIZED"}
+                        href={aiPath?.status === "GENERATING" ? `/trilha/gerando?career_path_id=${aiPath.id}` : aiPath ? `/trilha/${aiPath.id}` : "/constelacao"}
                         className="mt-5 inline-flex rounded-lg bg-teal-500 px-4 py-2 text-sm font-semibold text-zinc-950 hover:bg-teal-400"
                     >
                         {aiPath?.status === "GENERATING" ? "Acompanhar geracao" : "Abrir trilha IA"}

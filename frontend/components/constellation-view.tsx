@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Loader2, Lock } from "lucide-react";
+import { Loader2, Lock, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
@@ -299,9 +299,10 @@ function ConnectionLines({ placed, w, h }: { placed: Placed[]; w: number; h: num
 type ConstellationViewProps = {
     paths: CareerPath[];
     hasSubscription: boolean;
+    onAddTrail: () => void;
 };
 
-export function ConstellationView({ paths, hasSubscription }: ConstellationViewProps) {
+export function ConstellationView({ paths, hasSubscription, onAddTrail }: ConstellationViewProps) {
     const router = useRouter();
     const containerRef = useRef<HTMLDivElement>(null);
     const [dims, setDims] = useState({ w: 0, h: 0 });
@@ -321,10 +322,10 @@ export function ConstellationView({ paths, hasSubscription }: ConstellationViewP
 
     function handleClick(trail: CareerPath) {
         const href = trail.status === "GENERATING"
-            ? "/trilha/gerando"
+            ? `/trilha/gerando?career_path_id=${trail.id}`
             : trail.kind === "AI_PERSONALIZED" && !hasSubscription
                 ? "/paywall"
-                : `/trilha?kind=${trail.kind}`;
+                : `/trilha/${trail.id}`;
         setExiting(true);
         setTimeout(() => router.push(href), 360);
     }
@@ -381,6 +382,21 @@ export function ConstellationView({ paths, hasSubscription }: ConstellationViewP
                     />
                 );
             })}
+
+            {dims.w > 0 && (
+                <motion.button
+                    type="button"
+                    onClick={onAddTrail}
+                    className="absolute flex h-16 w-16 items-center justify-center rounded-full border border-teal-400/45 bg-teal-500/15 text-teal-100 transition hover:scale-105 hover:bg-teal-500/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                    style={{ left: dims.w / 2 - 32, top: Math.max(18, dims.h - 92) }}
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ type: "spring", stiffness: 180, damping: 18, delay: 0.2 }}
+                >
+                    <Plus className="h-7 w-7" />
+                    <span className="sr-only">Adicionar trilha</span>
+                </motion.button>
+            )}
 
             {placed.length === 0 && dims.w > 0 && (
                 <div className="absolute inset-0 flex items-center justify-center">

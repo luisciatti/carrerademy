@@ -171,6 +171,24 @@ export type CareerPath = {
     steps: CareerPathStep[];
 };
 
+export type TrailTemplate = {
+    id: string;
+    title: string;
+    description: string;
+    category: string;
+    career_type_tags: string[];
+    icon: string;
+    is_starter: boolean;
+    already_added: boolean;
+};
+
+export type AddedTrailTemplateResponse = {
+    career_path_id: string;
+    title: string;
+    kind: CareerPathKind;
+    status: ApiCareerPathStatus;
+};
+
 export type CompleteStepResponse = {
     completed_step_id: string;
     completed: boolean;
@@ -221,6 +239,7 @@ export type Achievement = {
     description: string;
     icon: string;
     unlocked: boolean;
+    unlocked_at?: string | null;
 };
 
 export type ProfilePathSummary = {

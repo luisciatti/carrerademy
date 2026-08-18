@@ -11,6 +11,7 @@ from app.core.config import get_settings
 from app.domain.enums import CareerPathKind, CareerPathStatus, CareerType, PathStepStatus
 from app.domain.models import CareerPath, ContentItem, OnboardingResponse, PathStep, User
 from app.schemas.onboarding import OnboardingCreate
+from app.services.trail_template_service import choose_starter_template, clone_template_to_path
 from app.shared.rate_limit import enforce_rate_limit
 from app.tasks.generate_career_path import generate_career_path_task
 
@@ -38,18 +39,28 @@ def create_onboarding_and_generate_path(*, db: Session, current_user: User, payl
 	db.add(onboarding)
 	db.flush()
 
-	standard_path = CareerPath(
-		user_id=current_user.id,
-		onboarding_response_id=onboarding.id,
-		title=_standard_path_title(payload.career_type),
-		kind=CareerPathKind.STANDARD_SOFT_SKILLS,
-		status=CareerPathStatus.ACTIVE,
-	)
-	db.add(standard_path)
-	db.flush()
+	starter_template = choose_starter_template(db=db, career_type=payload.career_type)
+	if starter_template is not None:
+		standard_path = clone_template_to_path(
+			db=db,
+			user=current_user,
+			onboarding_response_id=onboarding.id,
+			template=starter_template,
+			title_override=_standard_path_title(payload.career_type),
+		)
+	else:
+		standard_path = CareerPath(
+			user_id=current_user.id,
+			onboarding_response_id=onboarding.id,
+			title=_standard_path_title(payload.career_type),
+			kind=CareerPathKind.STANDARD_SOFT_SKILLS,
+			status=CareerPathStatus.ACTIVE,
+		)
+		db.add(standard_path)
+		db.flush()
 
-	for step in _build_standard_soft_skills_steps(db=db, career_path_id=standard_path.id, career_type=payload.career_type):
-		db.add(step)
+		for step in _build_standard_soft_skills_steps(db=db, career_path_id=standard_path.id, career_type=payload.career_type):
+			db.add(step)
 
 	ai_path = CareerPath(
 		user_id=current_user.id,

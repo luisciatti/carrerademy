@@ -47,7 +47,7 @@ export default function TrailGeneratingPage() {
                 setPath(aiPath);
 
                 if (aiPath.status === "ACTIVE") {
-                    router.replace("/trilha?kind=AI_PERSONALIZED");
+                    router.replace(`/trilha/${aiPath.id}`);
                 }
             } catch (e) {
                 if (cancelled) {

@@ -29,6 +29,28 @@ docker compose up -d
 
 Isso sobe `postgres`, `redis`, `backend` e `worker`.
 
+### Sempre que houver alteração no backend (schema/conteúdo)
+
+Rode este bloco no `backend/` para manter o banco atualizado:
+
+```powershell
+Set-Location C:/Users/luisc/OneDrive/Desktop/CarrerAdemy/backend
+
+# 1) Se voce criou/alterou modelos SQLAlchemy, gere uma migration nova
+alembic revision --autogenerate -m "descreva_a_mudanca"
+
+# 2) Aplique todas as migrations pendentes
+alembic upgrade head
+
+# 3) Recarregue dados base (conteudos e templates)
+python scripts/seed_content_items.py
+python scripts/seed_trail_templates.py
+```
+
+Observacao:
+- Quando voce apenas puxar mudancas do repositorio (sem criar migration nova), rode pelo menos `alembic upgrade head` + seeds.
+- Use uma mensagem de migration curta e objetiva (ex.: `add_trail_templates_catalog`).
+
 2. Rode o frontend nativo:
 
 ```powershell

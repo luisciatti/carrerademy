@@ -3,7 +3,19 @@
 import { useMemo } from "react";
 
 import { ApiError, useApiClient } from "./api-client";
-import type { CareerPath, CompleteStepResponse, DailySessionResponse, LeaderboardEntry, MeResponse, Note, OnboardingPayload, OnboardingResponse, ProfileResponse } from "./types";
+import type {
+    AddedTrailTemplateResponse,
+    CareerPath,
+    CompleteStepResponse,
+    DailySessionResponse,
+    LeaderboardEntry,
+    MeResponse,
+    Note,
+    OnboardingPayload,
+    OnboardingResponse,
+    ProfileResponse,
+    TrailTemplate,
+} from "./types";
 
 export function useBackendApi() {
     const fetcher = useApiClient();
@@ -26,6 +38,16 @@ export function useBackendApi() {
 
         async getCareerPathById(careerPathId: string) {
             return fetcher<CareerPath>(`/api/v1/career-paths/${careerPathId}`);
+        },
+
+        async listTrailTemplates() {
+            return fetcher<TrailTemplate[]>("/api/v1/trail-templates");
+        },
+
+        async addTrailTemplate(templateId: string) {
+            return fetcher<AddedTrailTemplateResponse>(`/api/v1/trail-templates/${templateId}/add`, {
+                method: "POST",
+            });
         },
 
         async completeStep(stepId: string, contentItemId?: string | null) {

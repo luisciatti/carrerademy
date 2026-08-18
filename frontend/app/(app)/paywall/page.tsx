@@ -63,8 +63,8 @@ export default function PaywallPage() {
 
             <div className="mt-8 flex flex-wrap gap-3">
                 <button className="rounded-lg bg-teal-500 px-5 py-2.5 text-sm font-semibold text-zinc-950 hover:bg-teal-400">Assinar (em breve)</button>
-                <a href="/trilha?kind=AI_PERSONALIZED" className="rounded-lg border border-zinc-700 px-5 py-2.5 text-sm font-semibold text-zinc-200 hover:border-teal-400">
-                    Voltar para trilha
+                <a href="/constelacao" className="rounded-lg border border-zinc-700 px-5 py-2.5 text-sm font-semibold text-zinc-200 hover:border-teal-400">
+                    Voltar para constelacao
                 </a>
             </div>
         </div>

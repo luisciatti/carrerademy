@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime
 
 from sqlalchemy import extract, func, select
 from sqlalchemy.orm import Session, selectinload
@@ -20,7 +20,19 @@ def get_profile(*, db: Session, user: User) -> dict:
     paths_completed = sum(1 for p in career_paths if p.status == CareerPathStatus.COMPLETED)
 
     unlocked_achievements = [
-        {"id": a.id, "title": a.title, "description": a.description, "icon": a.icon, "unlocked": True}
+        {
+            "id": a.id,
+            "title": a.title,
+            "description": a.description,
+            "icon": a.icon,
+            "unlocked": True,
+            "unlocked_at": _achievement_unlocked_at(
+                achievement_id=a.id,
+                progress=progress,
+                career_paths=career_paths,
+                subscriptions=subscriptions,
+            ),
+        }
         for a in ACHIEVEMENTS
         if a.check(user=user, progress=progress, career_paths=career_paths, subscriptions=subscriptions)
     ]
@@ -124,3 +136,52 @@ def _points_this_month(db: Session, user: User) -> int:
             extract("month", UserProgress.completed_at) == today.month,
         )
     ) or 0
+
+
+def _achievement_unlocked_at(*, achievement_id: str, progress: list[UserProgress], career_paths: list[CareerPath], subscriptions: list[Subscription]) -> str | None:
+    completed = sorted([p.completed_at for p in progress if p.completed_at is not None])
+
+    if achievement_id == "first_step":
+        return completed[0].isoformat() if completed else None
+
+    if achievement_id == "ten_steps":
+        return completed[9].isoformat() if len(completed) >= 10 else None
+
+    if achievement_id == "soft_trail_done":
+        soft_paths = [p for p in career_paths if p.kind == CareerPathKind.STANDARD_SOFT_SKILLS and p.status == CareerPathStatus.COMPLETED]
+        if not soft_paths:
+            return None
+        progress_by_step = {p.path_step_id: p.completed_at for p in progress if p.completed_at is not None}
+        moments: list[datetime] = []
+        for path in soft_paths:
+            for step in path.steps:
+                when = progress_by_step.get(step.id)
+                if when is not None:
+                    moments.append(when)
+        return max(moments).isoformat() if moments else None
+
+    if achievement_id == "explorer":
+        required = {
+            ContentItemType.VIDEO,
+            ContentItemType.QUIZ,
+            ContentItemType.SCENARIO_BUILDER,
+            ContentItemType.DIALOGUE_SIMULATOR,
+            ContentItemType.MATCHING_GAME,
+        }
+        first_seen: dict[ContentItemType, datetime] = {}
+        for entry in sorted(
+            [p for p in progress if p.completed_at is not None and p.path_step and p.path_step.content_item],
+            key=lambda p: p.completed_at,
+        ):
+            content_type = entry.path_step.content_item.type
+            if content_type in required and content_type not in first_seen:
+                first_seen[content_type] = entry.completed_at  # type: ignore[assignment]
+        if not required.issubset(first_seen.keys()):
+            return None
+        return max(first_seen.values()).isoformat()
+
+    if achievement_id == "subscriber":
+        active = [s.created_at for s in subscriptions if s.status.value == "ACTIVE"]
+        return min(active).isoformat() if active else None
+
+    return None

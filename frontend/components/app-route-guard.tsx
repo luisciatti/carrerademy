@@ -68,7 +68,7 @@ function GuardRuntime({
                 }
 
                 if (pathname === "/trilha/gerando" && aiPath?.status === "ACTIVE") {
-                    router.replace("/trilha?kind=AI_PERSONALIZED");
+                    router.replace(`/trilha/${aiPath.id}`);
                     return;
                 }
 

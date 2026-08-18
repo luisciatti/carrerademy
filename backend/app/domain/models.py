@@ -63,6 +63,12 @@ class CareerPath(Base):
     )
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     kind: Mapped[CareerPathKind] = mapped_column(SQLEnum(CareerPathKind, name="career_path_kind"), nullable=False)
+    source_trail_template_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("trail_templates.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
     generated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     status: Mapped[CareerPathStatus] = mapped_column(
         SQLEnum(CareerPathStatus, name="career_path_status"),
@@ -72,6 +78,7 @@ class CareerPath(Base):
 
     user: Mapped[User] = relationship(back_populates="career_paths")
     onboarding_response: Mapped[OnboardingResponse] = relationship(back_populates="career_paths")
+    source_trail_template: Mapped["TrailTemplate | None"] = relationship(back_populates="career_paths")
     steps: Mapped[list["PathStep"]] = relationship(
         back_populates="career_path",
         cascade="all, delete-orphan",
@@ -213,3 +220,47 @@ class Note(Base):
 
     user: Mapped[User] = relationship(back_populates="notes")
     path_step: Mapped["PathStep | None"] = relationship()
+
+
+class TrailTemplate(Base):
+    __tablename__ = "trail_templates"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=False)
+    category: Mapped[str] = mapped_column(String(100), nullable=False)
+    career_type_tags: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=False, default=list)
+    icon: Mapped[str] = mapped_column(String(80), nullable=False)
+    is_starter: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+    steps: Mapped[list["TrailTemplateStep"]] = relationship(
+        back_populates="template",
+        cascade="all, delete-orphan",
+        order_by="TrailTemplateStep.order_index",
+    )
+    career_paths: Mapped[list[CareerPath]] = relationship(back_populates="source_trail_template")
+
+
+class TrailTemplateStep(Base):
+    __tablename__ = "trail_template_steps"
+    __table_args__ = (UniqueConstraint("trail_template_id", "order_index", name="uq_template_step_order"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    trail_template_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("trail_templates.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    order_index: Mapped[int] = mapped_column(Integer, nullable=False)
+    content_item_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("content_items.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+
+    template: Mapped[TrailTemplate] = relationship(back_populates="steps")
+    content_item: Mapped[ContentItem] = relationship()
