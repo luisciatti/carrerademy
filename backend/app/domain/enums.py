@@ -72,3 +72,9 @@ class PaymentStatus(str, enum.Enum):
     SUCCEEDED = "SUCCEEDED"
     FAILED = "FAILED"
     CANCELED = "CANCELED"
+
+
+class DailyObjectiveType(str, enum.Enum):
+    PATH_STEP = "PATH_STEP"
+    REVIEW = "REVIEW"
+    BONUS = "BONUS"

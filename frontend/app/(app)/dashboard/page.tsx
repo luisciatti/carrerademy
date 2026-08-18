@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
+import { TrailCard } from "@/components/trail-card";
 import { extractApiMessage, isApiNotFound, useBackendApi } from "@/lib/api";
 import type { CareerPath, MeResponse } from "@/lib/types";
 
@@ -77,8 +78,8 @@ export default function DashboardPage() {
     if (loading) {
         return (
             <div className="space-y-4">
-                <div className="h-28 animate-pulse rounded-2xl bg-zinc-900/70" />
-                <div className="h-44 animate-pulse rounded-2xl bg-zinc-900/70" />
+                <div className="h-28 animate-pulse rounded-2xl bg-surface" />
+                <div className="h-44 animate-pulse rounded-2xl bg-surface" />
             </div>
         );
     }
@@ -90,40 +91,34 @@ export default function DashboardPage() {
     return (
         <div className="space-y-6">
             <section className="grid gap-4 md:grid-cols-3">
-                <article className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-5">
-                    <p className="text-xs uppercase tracking-widest text-zinc-500">Streak</p>
+                <article className="rounded-2xl border border-border bg-surface/40 p-5">
+                    <p className="text-xs uppercase tracking-widest text-muted">Streak</p>
                     <p className="mt-3 text-4xl font-black text-teal-200">0</p>
-                    <p className="mt-2 text-sm text-zinc-400">Comece hoje para iniciar sua sequencia.</p>
+                    <p className="mt-2 text-sm text-muted">Comece hoje para iniciar sua sequencia.</p>
                 </article>
 
-                <article className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-5 md:col-span-2">
-                    <p className="text-xs uppercase tracking-widest text-zinc-500">Conta</p>
-                    <h2 className="mt-2 text-2xl font-bold text-zinc-100">{data.me?.name ?? "Aluno"}</h2>
-                    <p className="mt-1 text-sm text-zinc-400">{data.me?.email}</p>
+                <article className="rounded-2xl border border-border bg-surface/40 p-5 md:col-span-2">
+                    <p className="text-xs uppercase tracking-widest text-muted">Conta</p>
+                    <h2 className="mt-2 text-2xl font-bold text-foreground">{data.me?.name ?? "Aluno"}</h2>
+                    <p className="mt-1 text-sm text-muted">{data.me?.email}</p>
                 </article>
             </section>
 
             <section className="grid gap-4 lg:grid-cols-2">
-                {renderPathCard({
-                    title: "Soft Skills",
-                    subtitle: "Gratuita e pronta agora",
-                    badge: "Gratis",
-                    badgeClassName: "bg-emerald-500/20 text-emerald-200",
-                    path: standardPath,
-                    href: "/trilha?kind=STANDARD_SOFT_SKILLS",
-                    progressValue: standardPath ? Math.round((standardPath.steps.filter((step) => step.status === "COMPLETED").length / Math.max(1, standardPath.steps.length)) * 100) : 0,
-                    progressLabel: `${standardPath ? Math.round((standardPath.steps.filter((step) => step.status === "COMPLETED").length / Math.max(1, standardPath.steps.length)) * 100) : 0}% concluido`,
-                })}
-                {renderPathCard({
-                    title: "Trilha Personalizada",
-                    subtitle: aiPath?.status === "GENERATING" ? "IA gerando em paralelo" : "Personalizada por IA",
-                    badge: aiPath?.status === "GENERATING" ? "Gerando" : "Premium",
-                    badgeClassName: aiPath?.status === "GENERATING" ? "bg-cyan-500/20 text-cyan-200" : "bg-teal-500/20 text-teal-200",
-                    path: aiPath,
-                    href: aiPath?.status === "GENERATING" ? "/trilha/gerando" : "/trilha?kind=AI_PERSONALIZED",
-                    progressValue: progress,
-                    progressLabel: `${progress}% concluido`,
-                })}
+                {standardPath && (
+                    <TrailCard
+                        path={standardPath}
+                        hasSubscription={data.me?.has_active_subscription ?? false}
+                        ctaHref="/trilha?kind=STANDARD_SOFT_SKILLS"
+                    />
+                )}
+                {aiPath && (
+                    <TrailCard
+                        path={aiPath}
+                        hasSubscription={data.me?.has_active_subscription ?? false}
+                        ctaHref={aiPath.status === "GENERATING" ? "/trilha/gerando" : "/trilha?kind=AI_PERSONALIZED"}
+                    />
+                )}
             </section>
 
             <section className="rounded-2xl border border-teal-900/40 bg-teal-950/20 p-4">
@@ -143,43 +138,4 @@ export default function DashboardPage() {
     );
 }
 
-function renderPathCard({
-    title,
-    subtitle,
-    badge,
-    badgeClassName,
-    path,
-    href,
-    progressValue,
-    progressLabel,
-}: {
-    title: string;
-    subtitle: string;
-    badge: string;
-    badgeClassName: string;
-    path: CareerPath | null;
-    href: string;
-    progressValue: number;
-    progressLabel: string;
-}) {
-    return (
-        <article className="rounded-2xl border border-teal-900/30 bg-gradient-to-br from-teal-950/20 to-zinc-950/50 p-6">
-            <div className="flex items-center justify-between gap-3">
-                <div>
-                    <p className="text-xs uppercase tracking-widest text-zinc-500">Caminho</p>
-                    <h3 className="mt-2 text-2xl font-bold text-zinc-100">{title}</h3>
-                    <p className="mt-1 text-sm text-zinc-300">{subtitle}</p>
-                </div>
-                <span className={`rounded-full px-3 py-1 text-xs font-semibold ${badgeClassName}`}>{badge}</span>
-            </div>
-            <p className="mt-4 text-sm text-zinc-400">{path?.title ?? "Aguardando disponibilidade"}</p>
-            <div className="mt-4 h-2 w-full overflow-hidden rounded bg-zinc-800">
-                <div className="h-full rounded bg-teal-500" style={{ width: `${path ? progressValue : 0}%` }} />
-            </div>
-            <p className="mt-2 text-sm text-zinc-300">{progressLabel}</p>
-            <Link href={href} className="mt-5 inline-flex rounded-lg bg-teal-500 px-4 py-2 text-sm font-semibold text-zinc-950 hover:bg-teal-400">
-                {path?.status === "GENERATING" ? "Acompanhar geracao" : "Abrir trilha"}
-            </Link>
-        </article>
-    );
-}
+

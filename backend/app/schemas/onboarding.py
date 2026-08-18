@@ -39,6 +39,7 @@ class ContentStageView(BaseModel):
 	matching_schema: dict | None
 	dialogue_schema: dict | None
 	follow_up_content_item_id: UUID | None
+	reward_description: str | None
 
 
 class PublicPathStep(BaseModel):
@@ -66,6 +67,7 @@ class PublicPathStep(BaseModel):
 	dialogue_schema: dict | None
 	follow_up_content_item_id: UUID | None
 	chain_items: list[ContentStageView]
+	reward_description: str | None
 
 
 class CareerPathView(BaseModel):

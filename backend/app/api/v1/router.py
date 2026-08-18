@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api.v1 import career_paths, me, onboarding, progress, subscriptions, webhooks
+from app.api.v1 import career_paths, daily_session, me, notes, onboarding, profile, progress, subscriptions, webhooks
 
 
 api_router = APIRouter()
@@ -10,3 +10,6 @@ api_router.include_router(progress.router, tags=["progress"])
 api_router.include_router(subscriptions.router, prefix="/subscriptions", tags=["subscriptions"])
 api_router.include_router(webhooks.router, prefix="/webhooks", tags=["webhooks"])
 api_router.include_router(me.router, tags=["me"])
+api_router.include_router(daily_session.router, tags=["daily-session"])
+api_router.include_router(profile.router, tags=["profile"])
+api_router.include_router(notes.router, tags=["notes"])

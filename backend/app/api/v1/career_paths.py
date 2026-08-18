@@ -120,8 +120,7 @@ def _serialize_career_path(*, db: Session, user: User, career_path: CareerPath) 
 				rules_schema=step.content_item.rules_schema if step.content_item else None,
 				matching_schema=step.content_item.matching_schema if step.content_item else None,
 				dialogue_schema=step.content_item.dialogue_schema if step.content_item else None,
-				follow_up_content_item_id=step.content_item.follow_up_content_item_id if step.content_item else None,
-				chain_items=[
+				follow_up_content_item_id=step.content_item.follow_up_content_item_id if step.content_item else None,					reward_description=step.content_item.reward_description if step.content_item else None,				chain_items=[
 					_build_content_stage(item=chain_item, hide_description=hide_description)
 					for chain_item in chain_items
 				],
@@ -178,4 +177,5 @@ def _build_content_stage(*, item: ContentItem, hide_description: bool) -> Conten
 		matching_schema=item.matching_schema,
 		dialogue_schema=item.dialogue_schema,
 		follow_up_content_item_id=item.follow_up_content_item_id,
+		reward_description=item.reward_description,
 	)

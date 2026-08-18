@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
-import { ClerkProvider } from "@clerk/nextjs";
 import { JetBrains_Mono, Space_Grotesk } from "next/font/google";
+
+import { ClerkProviderThemed } from "@/components/clerk-provider-themed";
+import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -20,13 +22,18 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <ClerkProvider>
-      <html
-        lang="en"
-        className={`${spaceGrotesk.variable} ${jetbrainsMono.variable} h-full antialiased`}
-      >
-        <body className="min-h-full flex flex-col bg-zinc-950 text-zinc-100">{children}</body>
-      </html>
-    </ClerkProvider>
+    <html
+      lang="pt-BR"
+      className={`${spaceGrotesk.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      suppressHydrationWarning
+    >
+      <body className="min-h-full flex flex-col bg-background text-foreground">
+        <ThemeProvider>
+          <ClerkProviderThemed>
+            {children}
+          </ClerkProviderThemed>
+        </ThemeProvider>
+      </body>
+    </html>
   );
 }

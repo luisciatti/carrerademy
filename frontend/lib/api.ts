@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 
 import { ApiError, useApiClient } from "./api-client";
-import type { CareerPath, CompleteStepResponse, MeResponse, OnboardingPayload, OnboardingResponse } from "./types";
+import type { CareerPath, CompleteStepResponse, DailySessionResponse, LeaderboardEntry, MeResponse, Note, OnboardingPayload, OnboardingResponse, ProfileResponse } from "./types";
 
 export function useBackendApi() {
     const fetcher = useApiClient();
@@ -33,6 +33,59 @@ export function useBackendApi() {
                 method: "POST",
                 body: JSON.stringify({ content_item_id: contentItemId ?? null }),
             });
+        },
+
+        async getDailySession() {
+            return fetcher<DailySessionResponse>("/api/v1/daily-session");
+        },
+
+        async completeDailyObjective(objectiveId: string) {
+            return fetcher<{ current_streak: number; longest_streak: number }>("/api/v1/daily-session/complete", {
+                method: "POST",
+                body: JSON.stringify({ objective_id: objectiveId }),
+            });
+        },
+
+        async getProfile() {
+            return fetcher<ProfileResponse>("/api/v1/profile");
+        },
+
+        async getLeaderboard() {
+            return fetcher<LeaderboardEntry[]>("/api/v1/leaderboard");
+        },
+
+        async getNotes(q?: string) {
+            const qs = q ? `?q=${encodeURIComponent(q)}` : "";
+            return fetcher<Note[]>(`/api/v1/notes${qs}`);
+        },
+
+        async getNoteByStep(stepId: string) {
+            return fetcher<Note | null>(`/api/v1/notes/by-step/${stepId}`);
+        },
+
+        async upsertNoteByStep(stepId: string, content: string, title?: string) {
+            return fetcher<Note>(`/api/v1/notes/by-step/${stepId}`, {
+                method: "PUT",
+                body: JSON.stringify({ content, title: title ?? null }),
+            });
+        },
+
+        async createNote(content: string, title?: string) {
+            return fetcher<Note>("/api/v1/notes", {
+                method: "POST",
+                body: JSON.stringify({ content, title: title ?? null }),
+            });
+        },
+
+        async updateNote(noteId: string, content: string, title?: string) {
+            return fetcher<Note>(`/api/v1/notes/${noteId}`, {
+                method: "PATCH",
+                body: JSON.stringify({ content, title: title ?? null }),
+            });
+        },
+
+        async deleteNote(noteId: string) {
+            return fetcher<void>(`/api/v1/notes/${noteId}`, { method: "DELETE" });
         },
     }), [fetcher]);
 }

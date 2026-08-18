@@ -4,6 +4,16 @@ export type ApiContentType = "COURSE" | "CERTIFICATION" | "ARTICLE" | "ACTION_TA
 export type CareerPathKind = "STANDARD_SOFT_SKILLS" | "AI_PERSONALIZED";
 export type CareerType = "TECH" | "DESIGN" | "MARKETING" | "SALES" | "FINANCE" | "OPERATIONS" | "OTHER";
 
+export type Note = {
+    id: string;
+    path_step_id: string | null;
+    step_title: string | null;
+    title: string | null;
+    content: string;
+    created_at: string;
+    updated_at: string;
+};
+
 export type QuizQuestion = {
     prompt: string;
     options: string[];
@@ -100,6 +110,7 @@ export type ContentChainItem = {
     matching_schema: MatchingSchema | null;
     dialogue_schema: DialogueSchema | null;
     follow_up_content_item_id: string | null;
+    reward_description: string | null;
 };
 
 export type GoalType =
@@ -148,6 +159,7 @@ export type CareerPathStep = {
     dialogue_schema: DialogueSchema | null;
     follow_up_content_item_id: string | null;
     chain_items: ContentChainItem[];
+    reward_description: string | null;
 };
 
 export type CareerPath = {
@@ -178,4 +190,68 @@ export type MeResponse = {
     email: string;
     name: string;
     free_step_used: boolean;
+    has_active_subscription: boolean;
+    current_streak: number;
+    longest_streak: number;
+};
+
+export type DailyObjective = {
+    id: string;
+    objective_type: "PATH_STEP" | "REVIEW" | "BONUS";
+    title: string;
+    description: string;
+    content_type: ApiContentType | null;
+    estimated_minutes: number;
+    reference_id: string | null;
+    step_id: string | null;
+    is_locked: boolean;
+    is_completed_today: boolean;
+};
+
+export type DailySessionResponse = {
+    today: string;
+    current_streak: number;
+    longest_streak: number;
+    objectives: DailyObjective[];
+};
+
+export type Achievement = {
+    id: string;
+    title: string;
+    description: string;
+    icon: string;
+    unlocked: boolean;
+};
+
+export type ProfilePathSummary = {
+    id: string;
+    title: string;
+    kind: CareerPathKind;
+    status: string;
+    steps_total: number;
+    steps_completed: number;
+};
+
+export type ProfileResponse = {
+    user: {
+        id: string;
+        name: string;
+        email: string;
+        current_streak: number;
+        longest_streak: number;
+    };
+    stats: {
+        steps_completed: number;
+        points_this_month: number;
+        best_streak: number;
+        paths_completed: number;
+    };
+    achievements: Achievement[];
+    paths: ProfilePathSummary[];
+};
+
+export type LeaderboardEntry = {
+    rank: number;
+    name: string;
+    points: number;
 };

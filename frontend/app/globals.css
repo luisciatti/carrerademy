@@ -1,22 +1,65 @@
 @import "tailwindcss";
 
+/* ── Light tokens ────────────────────────────────────────── */
 :root {
-  --background: #090910;
-  --foreground: #ededf5;
+  --background: #ffffff;
+  --foreground: #0a0e14;
+  --surface: #f4f5f7;
+  --surface-hover: #e9eaed;
+  --border: #e2e4e8;
+  --accent: #0d9488;
+  --accent-hover: #0f766e;
+  --muted: #6b7280;
+  --glow-primary: rgba(13, 148, 136, 0.12);
+  --glow-secondary: rgba(99, 102, 241, 0.08);
 }
 
+/* ── Dark tokens ─────────────────────────────────────────── */
+.dark {
+  --background: #09090b;
+  --foreground: #f4f4f5;
+  --surface: #18181b;
+  --surface-hover: #27272a;
+  --border: #27272a;
+  --accent: #14b8a6;
+  --accent-hover: #2dd4bf;
+  --muted: #a1a1aa;
+  --glow-primary: rgba(20, 184, 166, 0.22);
+  --glow-secondary: rgba(13, 148, 136, 0.24);
+}
+
+/* ── Tailwind v4 theme mapping ───────────────────────────── */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-muted: var(--muted);
   --font-sans: var(--font-space-grotesk);
   --font-mono: var(--font-jetbrains-mono);
 }
 
+/* background on html ensures the gradient covers the full scroll area, not just the viewport */
+html {
+  background: var(--background);
+}
+
+/* ── Constellation star twinkle ──────────────────────────── */
+@keyframes twinkle {
+  0%, 100% { opacity: var(--star-base-opacity, 0.3); }
+  50% { opacity: calc(var(--star-base-opacity, 0.3) * 0.2); }
+}
+
 body {
+  min-height: 100dvh;
   background:
-    radial-gradient(1200px 800px at 15% -10%, rgba(20, 184, 166, 0.22), transparent),
-    radial-gradient(1000px 700px at 90% 0%, rgba(13, 148, 136, 0.24), transparent),
+    radial-gradient(1200px 800px at 15% -10%, var(--glow-primary), transparent),
+    radial-gradient(1000px 700px at 90% 0%, var(--glow-secondary), transparent),
     var(--background);
   color: var(--foreground);
   font-family: var(--font-space-grotesk), sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }

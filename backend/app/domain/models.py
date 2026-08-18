@@ -1,11 +1,11 @@
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 
-from sqlalchemy import JSON, Boolean, DateTime, Enum as SQLEnum, ForeignKey, Integer, Numeric, String, Text, UniqueConstraint, func
+from sqlalchemy import JSON, Boolean, Date, DateTime, Enum as SQLEnum, ForeignKey, Integer, Numeric, String, Text, UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.domain.enums import CareerPathKind, CareerPathStatus, CareerType, ContentItemType, GoalType, PathStepStatus, PaymentProvider, PaymentStatus, SubscriptionPlan, SubscriptionStatus
+from app.domain.enums import CareerPathKind, CareerPathStatus, CareerType, ContentItemType, DailyObjectiveType, GoalType, PathStepStatus, PaymentProvider, PaymentStatus, SubscriptionPlan, SubscriptionStatus
 from app.infra.db.base import Base
 
 
@@ -18,6 +18,9 @@ class User(Base):
     name: Mapped[str] = mapped_column(String(255))
     password_hash: Mapped[str | None] = mapped_column(String(255), nullable=True)
     free_step_used: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    current_streak: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    longest_streak: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    last_activity_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
@@ -26,6 +29,8 @@ class User(Base):
     progress_logs: Mapped[list["UserProgress"]] = relationship(back_populates="user", cascade="all, delete-orphan")
     subscriptions: Mapped[list["Subscription"]] = relationship(back_populates="user", cascade="all, delete-orphan")
     ai_generation_logs: Mapped[list["AIGenerationLog"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    daily_activity_logs: Mapped[list["DailyActivityLog"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    notes: Mapped[list["Note"]] = relationship(back_populates="user", cascade="all, delete-orphan")
 
 
 class OnboardingResponse(Base):
@@ -92,6 +97,7 @@ class ContentItem(Base):
     matching_schema: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     dialogue_schema: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     follow_up_content_item_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("content_items.id", ondelete="SET NULL"), nullable=True)
+    reward_description: Mapped[str | None] = mapped_column(String(512), nullable=True)
     tags: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=False, default=list)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
@@ -179,3 +185,31 @@ class AIGenerationLog(Base):
 
     user: Mapped[User] = relationship(back_populates="ai_generation_logs")
     career_path: Mapped[CareerPath] = relationship(back_populates="ai_generation_logs")
+
+
+class DailyActivityLog(Base):
+    __tablename__ = "daily_activity_logs"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    activity_date: Mapped[date] = mapped_column(Date, nullable=False)
+    objective_type: Mapped[DailyObjectiveType] = mapped_column(SQLEnum(DailyObjectiveType, name="daily_objective_type"), nullable=False)
+    reference_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
+    completed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+    user: Mapped[User] = relationship(back_populates="daily_activity_logs")
+
+
+class Note(Base):
+    __tablename__ = "notes"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    path_step_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("path_steps.id", ondelete="SET NULL"), nullable=True, index=True)
+    title: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    content: Mapped[str] = mapped_column(Text, nullable=False, server_default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+
+    user: Mapped[User] = relationship(back_populates="notes")
+    path_step: Mapped["PathStep | None"] = relationship()
