@@ -28,7 +28,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
                         </Link>
                         <nav className="flex items-center gap-1 text-sm text-muted">
                             <Link href="/dashboard" className="rounded-md px-3 py-1.5 transition-colors duration-150 hover:bg-surface hover:text-foreground">Dashboard</Link>
-                            <Link href="/trilha" className="rounded-md px-3 py-1.5 transition-colors duration-150 hover:bg-surface hover:text-foreground">Trilha</Link>
+                            <Link href="/constelacao" className="rounded-md px-3 py-1.5 transition-colors duration-150 hover:bg-surface hover:text-foreground">Trilhas</Link>
                             <Link href="/daily-session" className="rounded-md px-3 py-1.5 transition-colors duration-150 hover:bg-surface hover:text-foreground">Daily</Link>
                             <Link href="/notas" className="rounded-md px-3 py-1.5 transition-colors duration-150 hover:bg-surface hover:text-foreground">Notas</Link>
                             <Link href="/perfil" className="rounded-md px-3 py-1.5 transition-colors duration-150 hover:bg-surface hover:text-foreground">Perfil</Link>

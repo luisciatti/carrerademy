@@ -1,36 +1,73 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Frontend CarrerAdemy
 
-## Getting Started
+Aplicação Next.js (App Router) com autenticação Clerk.
 
-First, run the development server:
+## Pré-requisitos
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Node.js 22+
+- npm
+
+## Variáveis de ambiente
+
+1. Crie o arquivo local:
+
+```powershell
+Set-Location C:/Users/luisc/OneDrive/Desktop/CarrerAdemy/frontend
+Copy-Item .env.example .env.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Preencha as variáveis no `.env.local`:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
+CLERK_SECRET_KEY=
+NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
+NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Rodar nativo (modo desenvolvimento)
 
-## Learn More
+Esse é o modo recomendado para desenvolvimento por causa do hot-reload mais rápido.
 
-To learn more about Next.js, take a look at the following resources:
+```powershell
+Set-Location C:/Users/luisc/OneDrive/Desktop/CarrerAdemy/frontend
+npm install
+npm run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Acesso: `http://localhost:3000`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Nesse modo, a API deve apontar para:
 
-## Deploy on Vercel
+- `NEXT_PUBLIC_API_URL=http://localhost:8000`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Rodar com Docker (modo full)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+O frontend containerizado sobe em modo produção via profile `full` no Compose do backend:
+
+```powershell
+Set-Location C:/Users/luisc/OneDrive/Desktop/CarrerAdemy/backend
+docker compose --profile full up -d
+```
+
+Acesso: `http://localhost:3000`
+
+No container, a API precisa apontar para o nome do serviço Docker:
+
+- `NEXT_PUBLIC_API_URL=http://backend:8000`
+
+Esse valor já é forçado no serviço `frontend` do Compose.
+
+## Build local
+
+```powershell
+Set-Location C:/Users/luisc/OneDrive/Desktop/CarrerAdemy/frontend
+npm run build
+npm run start
+```
+
+## Troubleshooting rápido
+
+- Erro do Clerk `Missing publishableKey`: confira `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` no `.env.local`.
+- Erro de comunicação com backend: valide `NEXT_PUBLIC_API_URL` conforme o modo (nativo vs container).

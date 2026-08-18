@@ -1,101 +1,80 @@
 # CarrerAdemy Monorepo
 
-Este repositório unifica backend e frontend em uma única raiz para versionamento e deploy coordenado.
+Monorepo com backend FastAPI e frontend Next.js, versionados juntos para desenvolvimento e deploy coordenado.
 
 ## Estrutura
 
-- `backend/`: API FastAPI, modelos SQLAlchemy, Alembic, Docker Compose e integrações de autenticação.
+- `backend/`: API FastAPI, SQLAlchemy, Alembic, Celery e Docker Compose.
 - `frontend/`: aplicação Next.js com Clerk.
-- `docs/`: documentação funcional e técnica do projeto.
+- `docs/`: documentação funcional e técnica.
 
 ## Pré-requisitos
 
-- Docker Desktop ativo (engine Linux)
-- Python 3.11+ com ambiente virtual para o backend
-- Node.js 20+ e npm
+- Docker Desktop ativo (engine Linux).
+- Python 3.11+.
+- Node.js 22+ e npm.
 
-## Como rodar o backend
+## Modos de execução
 
-1. Entre na pasta do backend:
+### 1) Modo dia a dia (recomendado para desenvolvimento)
+
+Esse é o fluxo recomendado porque mantém o hot-reload do Next.js mais rápido, rodando nativo fora do Docker.
+
+1. Suba backend + infraestrutura:
 
 ```powershell
 Set-Location C:/Users/luisc/OneDrive/Desktop/CarrerAdemy/backend
-```
-
-2. Suba infraestrutura local:
-
-```powershell
 docker compose up -d
 ```
 
-3. Aplique migrations:
+Isso sobe `postgres`, `redis`, `backend` e `worker`.
 
-```powershell
-C:/Users/luisc/OneDrive/Desktop/CarrerAdemy/.venv/Scripts/alembic.exe upgrade head
-```
-
-4. Popule a base curada inicial de conteudo:
-
-```powershell
-$env:PYTHONPATH="C:/Users/luisc/OneDrive/Desktop/CarrerAdemy/backend"
-C:/Users/luisc/OneDrive/Desktop/CarrerAdemy/.venv/Scripts/python.exe scripts/seed_content_items.py
-```
-
-5. Suba a API:
-
-```powershell
-uvicorn app.main:app --reload
-```
-
-6. Em outro terminal, suba o worker Celery (Windows):
-
-```powershell
-celery -A app.infra.queue.celery_app worker --loglevel=info --pool=solo
-```
-
-7. Teste o health check:
-
-- `http://127.0.0.1:8000/health`
-
-## Como rodar o frontend
-
-1. Entre na pasta do frontend:
+2. Rode o frontend nativo:
 
 ```powershell
 Set-Location C:/Users/luisc/OneDrive/Desktop/CarrerAdemy/frontend
-```
-
-2. Instale dependências (se necessário):
-
-```powershell
 npm install
-```
-
-3. Garanta a variavel de ambiente da API (arquivo `frontend/.env.local`):
-
-```env
-NEXT_PUBLIC_API_URL=http://localhost:8000
-```
-
-4. Rode em desenvolvimento:
-
-```powershell
 npm run dev
 ```
 
-5. Acesse:
+3. Acesse:
 
-- `http://localhost:3000`
+- Frontend: `http://localhost:3000`
+- Backend health: `http://localhost:8000/health`
 
-## Comandos úteis
+### 2) Modo completo (stack inteira)
 
-- Backend lint/testes: definir conforme a evolução do projeto.
-- Frontend lint:
+Use para validar a stack completa antes de deploy, ensaios de demonstração e testes integrados de execução containerizada.
 
 ```powershell
-Set-Location C:/Users/luisc/OneDrive/Desktop/CarrerAdemy/frontend
-npm run lint
+Set-Location C:/Users/luisc/OneDrive/Desktop/CarrerAdemy/backend
+docker compose --profile full up -d
 ```
+
+Isso sobe tudo, incluindo `frontend` containerizado em modo produção na porta `3000`.
+
+## Parar ambiente
+
+```powershell
+Set-Location C:/Users/luisc/OneDrive/Desktop/CarrerAdemy/backend
+docker compose down
+```
+
+## Deploy (inicial/provisório)
+
+### Build das imagens de produção
+
+```powershell
+Set-Location C:/Users/luisc/OneDrive/Desktop/CarrerAdemy/backend
+docker compose build backend worker
+docker compose --profile full build frontend
+```
+
+### Próximos passos de infraestrutura
+
+- Reservado para definição do provedor de produção (Railway/Render/OCI).
+- Reservado para pipeline CI/CD com publicação de imagens.
+- Reservado para estratégia de variáveis secretas e observabilidade.
 
 ## Documentação
 
