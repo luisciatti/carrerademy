@@ -7,17 +7,17 @@ const PRIMARY_CTA_VISITOR = "/sign-up";
 
 const DIFF_ITEMS = [
   {
-    icon: <Compass className="h-6 w-6 text-teal-400" />,
+    icon: <Compass className="h-6 w-6 text-accent-blue" />,
     title: "Sobre você, não sobre uma prova",
     body: "Sua trilha é montada a partir do seu emprego atual, seu objetivo e seu tempo disponível — não é uma lista padrão de tópicos pra decorar.",
   },
   {
-    icon: <Zap className="h-6 w-6 text-teal-400" />,
+    icon: <Zap className="h-6 w-6 text-accent-purple" />,
     title: "Comece sem esperar",
     body: "Sua primeira trilha de habilidades aparece na hora, gratuita, enquanto sua trilha personalizada por IA é gerada em segundo plano.",
   },
   {
-    icon: <MessageSquare className="h-6 w-6 text-teal-400" />,
+    icon: <MessageSquare className="h-6 w-6 text-accent-mint" />,
     title: "Aprenda fazendo, não só lendo",
     body: "Simulações de conversa, desafios práticos e quizzes — não só vídeo e texto pra passar os olhos.",
   },
@@ -45,14 +45,14 @@ const ACTIVITY_CARDS = [
   {
     label: "Simulador de conversa",
     caption: "Pratique conversas difíceis antes de tê-las de verdade.",
-    accent: "border-teal-700/40 bg-teal-950/20",
+    accent: "border-accent-blue/35 bg-accent-blue/10",
     preview: (
-      <div className="mt-3 space-y-2 rounded-xl border border-teal-800/30 bg-surface/60 p-3 text-xs">
+      <div className="mt-3 space-y-2 rounded-xl border border-accent-blue/30 bg-surface/70 p-3 text-xs">
         <p className="text-muted uppercase tracking-wide">Colega</p>
         <p className="text-foreground">Não entendi por que você marcou esta conversa.</p>
         <div className="mt-2 grid gap-1.5">
           <div className="rounded-lg border border-border bg-surface px-3 py-1.5 text-muted">Você interrompe demais nas reuniões.</div>
-          <div className="rounded-lg border border-teal-500/50 bg-teal-500/10 px-3 py-1.5 text-teal-100">Quero alinhar um ponto pra trabalharmos melhor.</div>
+          <div className="rounded-lg border border-accent-blue/50 bg-accent-blue/12 px-3 py-1.5 text-accent-blue">Quero alinhar um ponto pra trabalharmos melhor.</div>
         </div>
       </div>
     ),
@@ -60,11 +60,11 @@ const ACTIVITY_CARDS = [
   {
     label: "Cenário arrastar e organizar",
     caption: "Aplique o conceito na prática, não só leia sobre ele.",
-    accent: "border-violet-700/40 bg-violet-950/20",
+    accent: "border-accent-purple/35 bg-accent-purple/10",
     preview: (
       <div className="mt-3 space-y-1.5 text-xs">
         {["Preparar contexto e exemplos", "Ouvir a percepção da pessoa", "Compartilhar feedback objetivo", "Combinar próximos passos"].map((item, i) => (
-          <div key={item} className={`flex items-center gap-2 rounded-xl border px-3 py-2 ${i === 1 ? "border-teal-500/50 bg-teal-500/10 text-teal-100" : "border-border bg-surface text-muted"}`}>
+          <div key={item} className={`flex items-center gap-2 rounded-xl border px-3 py-2 ${i === 1 ? "border-accent-purple/50 bg-accent-purple/12 text-accent-purple" : "border-border bg-surface text-muted"}`}>
             <span className="w-4 text-center font-bold text-muted">{i + 1}</span>
             {item}
           </div>
@@ -75,7 +75,7 @@ const ACTIVITY_CARDS = [
   {
     label: "Mapa da trilha",
     caption: "Veja exatamente onde você está e o que vem a seguir.",
-    accent: "border-emerald-700/40 bg-emerald-950/20",
+    accent: "border-accent-mint/35 bg-accent-mint/10",
     preview: (
       <div className="mt-3 flex flex-col items-center gap-3 py-1 text-xs">
         {[
@@ -84,10 +84,10 @@ const ACTIVITY_CARDS = [
           { label: "Gestão de conflito", done: false },
         ].map(({ label, done, active }) => (
           <div key={label} className="flex items-center gap-3">
-            <div className={`flex h-10 w-10 items-center justify-center rounded-full border-2 font-bold ${done ? "border-emerald-400 bg-emerald-500/20 text-emerald-200" : active ? "border-teal-300 bg-teal-500/20 text-teal-100 shadow-[0_0_20px_rgba(20,184,166,0.3)]" : "border-border bg-surface text-muted"}`}>
+            <div className={`flex h-10 w-10 items-center justify-center rounded-full border-2 font-bold ${done ? "border-accent-mint/60 bg-accent-mint/20 text-accent-mint" : active ? "border-accent-blue/50 bg-accent-blue/20 text-accent-blue shadow-[0_0_20px_rgba(75,123,236,0.3)]" : "border-border bg-surface text-muted"}`}>
               {done ? <CheckCircle className="h-4 w-4" /> : <span className="text-[10px]">{active ? "●" : "○"}</span>}
             </div>
-            <span className={done ? "text-emerald-300" : active ? "font-semibold text-foreground" : "text-muted"}>{label}</span>
+            <span className={done ? "text-accent-mint" : active ? "font-semibold text-foreground" : "text-muted"}>{label}</span>
           </div>
         ))}
       </div>
@@ -96,11 +96,11 @@ const ACTIVITY_CARDS = [
   {
     label: "Trilha por tipo de carreira",
     caption: "Tech, Design, Marketing, Vendas, Financeiro, Operações — a trilha muda com você.",
-    accent: "border-amber-700/40 bg-amber-950/20",
+    accent: "border-accent-coral/35 bg-accent-coral/10",
     preview: (
       <div className="mt-3 grid grid-cols-3 gap-1.5 text-[11px]">
         {["Tech", "Design", "Marketing", "Vendas", "Financas", "Operacoes"].map((label, i) => (
-          <div key={label} className={`rounded-lg border px-2 py-1.5 text-center font-semibold ${i === 0 ? "border-teal-500/50 bg-teal-500/15 text-teal-200" : "border-border bg-surface text-muted"}`}>
+          <div key={label} className={`rounded-lg border px-2 py-1.5 text-center font-semibold ${i === 0 ? "border-accent-coral/50 bg-accent-coral/15 text-accent-coral" : "border-border bg-surface text-muted"}`}>
             {label}
           </div>
         ))}
@@ -135,7 +135,7 @@ export default async function Home() {
           <span className="text-lg font-black tracking-tight text-accent">CarrerAdemy</span>
           <div className="flex items-center gap-3">
             <Link href="/sign-in" className="text-sm text-muted hover:text-accent">Entrar</Link>
-            <Link href={ctaHref} className="rounded-lg bg-teal-500 px-4 py-2 text-sm font-semibold text-zinc-950 hover:bg-teal-400">
+            <Link href={ctaHref} className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white hover:bg-accent-hover">
               Começar grátis
             </Link>
           </div>
@@ -146,48 +146,60 @@ export default async function Home() {
         {/* ── 1. Hero ───────────────────────────────────────────── */}
         <section id="hero" className="mx-auto max-w-6xl px-6 py-24 md:py-36">
           <div className="max-w-3xl">
-            <span className="inline-block rounded-full border border-teal-800/50 bg-teal-950/40 px-3 py-1 text-xs font-medium text-teal-300">
-              Grátis para começar · Sem cartão de crédito
+            <span className="inline-block rounded-full border border-accent-blue/35 bg-accent-blue/10 px-3 py-1 text-xs font-medium text-accent-blue">
+              Grátis para explorar · Sem cartão de crédito
             </span>
             <h1 className="mt-5 text-4xl font-black leading-tight tracking-tight text-foreground md:text-6xl">
-              Sua carreira não é genérica.{" "}
-              <span className="text-teal-400">Sua trilha também não deveria ser.</span>
+              Vamos descobrir seu próximo passo{" "}
+              <span className="text-accent-blue">sem cair num formulário engessado.</span>
             </h1>
             <p className="mt-6 max-w-2xl text-lg text-muted">
-              Responda algumas perguntas sobre onde você está e onde quer chegar. Em segundos, você já tem uma trilha prática pra começar — e uma trilha personalizada por IA sendo montada só pra você.
+              Você conta onde está, para onde quer ir e quanto tempo realmente cabe na sua semana. A partir daí, o CarrerAdemy abre uma trilha grátis na hora e prepara sua constelação personalizada em segundo plano.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link href={ctaHref} className="inline-flex items-center gap-2 rounded-xl bg-teal-500 px-6 py-3 text-sm font-bold text-zinc-950 hover:bg-teal-400">
+              <Link href={ctaHref} className="inline-flex items-center gap-2 rounded-xl bg-accent px-6 py-3 text-sm font-bold text-white hover:bg-accent-hover">
                 Começar grátis <ArrowRight className="h-4 w-4" />
               </Link>
-              <a href="#como-funciona" className="inline-flex items-center gap-2 rounded-xl border border-border px-6 py-3 text-sm font-semibold text-foreground hover:border-teal-500/60">
+              <a href="#como-funciona" className="inline-flex items-center gap-2 rounded-xl border border-border px-6 py-3 text-sm font-semibold text-foreground hover:border-accent-blue/50">
                 Ver como funciona <ChevronDown className="h-4 w-4" />
               </a>
             </div>
           </div>
 
-          {/* Trail map preview: transparent so the body gradient shows through */}
-          <div className="mt-16 overflow-hidden rounded-2xl border border-teal-900/40 bg-transparent p-6 ring-1 ring-inset ring-teal-900/20 shadow-[0_0_80px_rgba(13,148,136,0.12)]">
-            <p className="mb-4 text-xs uppercase tracking-widest text-muted">Prévia do mapa da trilha</p>
-            <div className="relative mx-auto flex max-w-lg flex-col items-center gap-6 py-2">
-              <div className="absolute left-1/2 top-0 h-full -translate-x-1/2 border-l-2 border-dashed border-teal-700/40" />
+          <div className="mt-16 overflow-hidden rounded-3xl border border-accent-blue/20 bg-gradient-to-br from-white/75 via-accent-purple/12 to-accent-mint/10 p-6 ring-1 ring-inset ring-accent-blue/15 shadow-[0_0_80px_rgba(75,123,236,0.12)]">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div className="max-w-sm">
+                <p className="mb-2 text-xs uppercase tracking-widest text-muted">Prévia da constelação</p>
+                <h3 className="text-2xl font-black text-foreground">Sua carreira vira um mapa vivo, não uma lista parada.</h3>
+                <p className="mt-2 text-sm text-muted">Cada planeta é uma trilha. Algumas já estão prontas para começar, outras aparecem como possibilidades novas conforme você evolui.</p>
+              </div>
+              <div className="rounded-full border border-accent-blue/30 bg-white/75 px-3 py-1 text-xs font-semibold text-accent-blue">
+                Explore antes de se comprometer
+              </div>
+            </div>
+            <div className="relative mx-auto mt-8 h-[24rem] max-w-4xl overflow-hidden rounded-2xl border border-border/60 bg-background/45">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(75,123,236,0.12),transparent_58%)]" />
               {[
-                { label: "Comunicação assertiva", status: "done", side: "left" },
-                { label: "Feedback eficaz", status: "active", side: "right" },
-                { label: "Gestão de conflito", status: "locked", side: "left" },
-                { label: "Negociação de prazo", status: "locked", side: "right" },
-              ].map(({ label, status, side }) => (
-                <div key={label} className={`relative z-10 flex w-full items-center gap-4 ${side === "right" ? "flex-row-reverse" : ""}`}>
-                  <div className={`flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full border-2 text-sm font-bold transition ${status === "done" ? "border-emerald-400 bg-emerald-500/20 text-emerald-200" : status === "active" ? "border-teal-300 bg-teal-500/20 text-teal-100 shadow-[0_0_28px_rgba(20,184,166,0.35)]" : "border-border bg-surface text-muted"}`}>
-                    {status === "done" ? <CheckCircle className="h-5 w-5" /> : status === "active" ? "●" : "○"}
-                  </div>
-                  <div className={`w-52 rounded-2xl border p-3 ${status === "done" ? "border-emerald-800/40 bg-emerald-950/20" : status === "active" ? "border-teal-700/50 bg-teal-950/30" : "border-border bg-surface/40 opacity-50"}`}>
-                    <p className={`text-sm font-semibold ${status === "active" ? "text-foreground" : status === "done" ? "text-emerald-200" : "text-muted"}`}>{label}</p>
-                    {status === "active" && <p className="mt-0.5 text-xs text-teal-300">Você está aqui</p>}
-                    {status === "done" && <p className="mt-0.5 text-xs text-emerald-400">Concluída</p>}
+                { title: "Trilha IA", subtitle: "Seu objetivo real", left: "44%", top: "18%", size: "h-24 w-24", active: true },
+                { title: "Comunicação", subtitle: "Em andamento", left: "20%", top: "42%", size: "h-20 w-20" },
+                { title: "Feedback", subtitle: "Pronta para abrir", left: "68%", top: "40%", size: "h-20 w-20" },
+                { title: "Conflitos", subtitle: "Desbloqueia depois", left: "38%", top: "68%", size: "h-16 w-16", muted: true },
+                { title: "Negociação", subtitle: "Nova possibilidade", left: "74%", top: "72%", size: "h-16 w-16", muted: true },
+              ].map((planet) => (
+                <div key={planet.title} className="absolute" style={{ left: planet.left, top: planet.top }}>
+                  <div className={`relative -translate-x-1/2 -translate-y-1/2 rounded-full border-2 ${planet.size} ${planet.active ? "border-accent-blue/60 bg-gradient-to-br from-accent-blue to-accent-purple shadow-[0_0_36px_rgba(75,123,236,0.38)]" : planet.muted ? "border-border bg-surface text-muted opacity-70" : "border-accent-mint/55 bg-gradient-to-br from-accent-mint to-accent-blue shadow-[0_0_24px_rgba(46,217,165,0.22)]"}`} />
+                  <div className="pointer-events-none absolute left-1/2 top-[calc(100%+0.75rem)] w-32 -translate-x-1/2 text-center">
+                    <p className="text-xs font-bold text-foreground">{planet.title}</p>
+                    <p className="mt-0.5 text-[11px] text-muted">{planet.subtitle}</p>
                   </div>
                 </div>
               ))}
+              <svg className="absolute inset-0 h-full w-full" aria-hidden>
+                <line x1="45%" y1="22%" x2="24%" y2="45%" stroke="rgba(75,123,236,0.24)" strokeWidth="2" />
+                <line x1="45%" y1="22%" x2="70%" y2="43%" stroke="rgba(155,114,242,0.22)" strokeWidth="2" />
+                <line x1="24%" y1="45%" x2="40%" y2="70%" stroke="rgba(46,217,165,0.2)" strokeWidth="2" strokeDasharray="5 6" />
+                <line x1="70%" y1="43%" x2="75%" y2="74%" stroke="rgba(255,126,103,0.2)" strokeWidth="2" strokeDasharray="5 6" />
+              </svg>
             </div>
           </div>
         </section>
@@ -197,7 +209,7 @@ export default async function Home() {
           <div className="mx-auto grid max-w-6xl gap-8 px-6 py-16 md:grid-cols-3">
             {DIFF_ITEMS.map(({ icon, title, body }) => (
               <div key={title} className="space-y-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-teal-800/40 bg-teal-950/30">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-accent-blue/30 bg-accent-blue/10">
                   {icon}
                 </div>
                 <h3 className="font-bold text-foreground">{title}</h3>
@@ -210,11 +222,11 @@ export default async function Home() {
         {/* ── 3. Como funciona ─────────────────────────────────── */}
         <section id="como-funciona" className="mx-auto max-w-6xl px-6 py-24">
           <p className="text-xs uppercase tracking-widest text-muted">Como funciona</p>
-          <h2 className="mt-2 text-3xl font-black text-foreground md:text-4xl">Três perguntas. Duas trilhas. Uma direção.</h2>
+          <h2 className="mt-2 text-3xl font-black text-foreground md:text-4xl">Poucas respostas. Mais clareza sobre por onde começar.</h2>
           <div className="mt-12 grid gap-8 md:grid-cols-3">
             {HOW_STEPS.map(({ n, title, body }) => (
               <div key={n} className="relative rounded-2xl border border-border/60 bg-surface/40 p-6">
-                <span className="text-6xl font-black text-teal-500/20 leading-none select-none">{n}</span>
+                <span className="text-6xl font-black text-accent-blue/20 leading-none select-none">{n}</span>
                 <h3 className="mt-2 font-bold text-foreground">{title}</h3>
                 <p className="mt-2 text-sm text-muted">{body}</p>
               </div>
@@ -225,17 +237,17 @@ export default async function Home() {
         {/* ── 4. Vitrine de atividades ─────────────────────────── */}
         <section className="border-y border-border/40 bg-surface/30">
           <div className="mx-auto max-w-6xl px-6 py-24">
-            <p className="text-xs uppercase tracking-widest text-muted">Atividades</p>
-            <h2 className="mt-2 text-3xl font-black text-foreground md:text-4xl">Não é só assistir. É praticar.</h2>
-            <p className="mt-3 max-w-xl text-sm text-muted">
-              Cada etapa da trilha combina tipos diferentes de atividade pra você absorver e aplicar — não só marcar como lido.
+            <p className="text-xs uppercase tracking-widest text-muted">Atividades + constelação</p>
+            <h2 className="mt-2 text-3xl font-black text-foreground md:text-4xl">Você não recebe só conteúdo. Recebe um universo para explorar.</h2>
+            <p className="mt-3 max-w-2xl text-sm text-muted">
+              A constelação mostra o panorama da sua evolução, e cada etapa mistura formatos diferentes para você entender, testar e aplicar no mundo real.
             </p>
             <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
               {ACTIVITY_CARDS.map(({ label, caption, accent, preview }) => (
                 <div key={label} className={`rounded-2xl border p-4 ${accent}`}>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">{label}</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted">{label}</p>
                   {preview}
-                  <p className="mt-4 text-xs text-zinc-400">{caption}</p>
+                  <p className="mt-4 text-xs text-muted">{caption}</p>
                 </div>
               ))}
             </div>
@@ -252,11 +264,11 @@ export default async function Home() {
                 <tr>
                   <th className="w-1/3 pb-4 text-left text-xs uppercase tracking-widest text-muted" />
                   <th className="pb-4 text-center">
-                    <div className="inline-block rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-bold text-emerald-300">Trilha de Habilidades</div>
+                    <div className="inline-block rounded-full bg-accent-mint/15 px-3 py-1 text-xs font-bold text-accent-mint">Trilha de Habilidades</div>
                     <p className="mt-1 text-xs text-muted">Sempre grátis</p>
                   </th>
                   <th className="pb-4 text-center">
-                    <div className="inline-block rounded-full bg-teal-500/15 px-3 py-1 text-xs font-bold text-teal-300">Trilha por IA</div>
+                    <div className="inline-block rounded-full bg-accent-blue/15 px-3 py-1 text-xs font-bold text-accent-blue">Trilha por IA</div>
                     <p className="mt-1 text-xs text-muted">Assinatura</p>
                   </th>
                 </tr>
@@ -266,14 +278,14 @@ export default async function Home() {
                   <tr key={feature}>
                     <td className="py-4 font-semibold text-foreground">{feature}</td>
                     <td className="py-4 text-center text-muted">{free}</td>
-                    <td className="py-4 text-center text-teal-300">{ai}</td>
+                    <td className="py-4 text-center text-accent-blue">{ai}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
           <div className="mt-8 text-center">
-            <Link href={ctaHref} className="inline-flex items-center gap-2 rounded-xl bg-teal-500 px-6 py-3 text-sm font-bold text-zinc-950 hover:bg-teal-400">
+            <Link href={ctaHref} className="inline-flex items-center gap-2 rounded-xl bg-accent px-6 py-3 text-sm font-bold text-white hover:bg-accent-hover">
               Comece pela trilha grátis — sem compromisso <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
@@ -283,11 +295,11 @@ export default async function Home() {
         <section className="border-t border-border/40">
           <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-8 px-6 py-10">
             {TRUST_ITEMS.map(({ icon, label, sub }) => (
-              <div key={label} className="flex items-center gap-2 text-sm text-zinc-400">
-                <span className="text-zinc-500">{icon}</span>
+              <div key={label} className="flex items-center gap-2 text-sm text-muted">
+                <span className="text-muted">{icon}</span>
                 <span>{label}</span>
-                <span className="text-zinc-600">·</span>
-                <span className="text-zinc-500 text-xs">{sub}</span>
+                <span className="text-muted">·</span>
+                <span className="text-muted text-xs">{sub}</span>
               </div>
             ))}
           </div>
@@ -295,15 +307,15 @@ export default async function Home() {
 
         {/* ── 7. CTA final ─────────────────────────────────────── */}
         <section className="mx-auto max-w-3xl px-6 py-28 text-center">
-          <Sparkles className="mx-auto mb-4 h-8 w-8 text-teal-400 opacity-70" />
+          <Sparkles className="mx-auto mb-4 h-8 w-8 text-accent-blue opacity-70" />
           <h2 className="text-3xl font-black text-foreground md:text-5xl">
             Sua próxima etapa de carreira começa com uma pergunta,{" "}
-            <span className="text-teal-400">não com uma mensalidade.</span>
+            <span className="text-accent-blue">não com uma mensalidade.</span>
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-muted">
             Crie sua conta em segundos e comece a trilha hoje.
           </p>
-          <Link href={ctaHref} className="mt-8 inline-flex items-center gap-2 rounded-xl bg-teal-500 px-8 py-4 text-base font-bold text-zinc-950 hover:bg-teal-400">
+          <Link href={ctaHref} className="mt-8 inline-flex items-center gap-2 rounded-xl bg-accent px-8 py-4 text-base font-bold text-white hover:bg-accent-hover">
             Começar agora, de graça <ArrowRight className="h-5 w-5" />
           </Link>
           <p className="mt-3 text-xs text-muted">Sem cartão de crédito. Sem contrato.</p>
@@ -312,13 +324,13 @@ export default async function Home() {
 
       {/* ── 8. Footer ────────────────────────────────────────────── */}
       <footer className="border-t border-border/60 bg-surface/30">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-8 text-xs text-zinc-500">
-          <span className="font-black tracking-tight text-teal-300">CarrerAdemy</span>
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-8 text-xs text-muted">
+          <span className="font-black tracking-tight text-accent-blue">CarrerAdemy</span>
           <nav className="flex flex-wrap gap-4">
-            <Link href="#" className="hover:text-zinc-300">Sobre</Link>
-            <Link href="#" className="hover:text-zinc-300">Contato</Link>
-            <Link href="#" className="hover:text-zinc-300">Termos de uso</Link>
-            <Link href="#" className="hover:text-zinc-300">Privacidade</Link>
+            <Link href="#" className="hover:text-foreground">Sobre</Link>
+            <Link href="#" className="hover:text-foreground">Contato</Link>
+            <Link href="#" className="hover:text-foreground">Termos de uso</Link>
+            <Link href="#" className="hover:text-foreground">Privacidade</Link>
           </nav>
           <span>© {new Date().getFullYear()} CarrerAdemy</span>
         </div>

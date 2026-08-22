@@ -16,7 +16,7 @@ function SortablePiece({ id, label }: { id: string; label: string }) {
             style={{ transform: CSS.Transform.toString(transform), transition }}
             {...attributes}
             {...listeners}
-            className="cursor-grab rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-sm text-zinc-100 active:cursor-grabbing"
+            className="cursor-grab rounded-xl border border-accent-blue/35 bg-surface px-4 py-3 text-sm text-foreground active:cursor-grabbing"
         >
             {label}
         </div>
@@ -64,7 +64,7 @@ export function ScenarioBuilder({
 
     return (
         <div className="space-y-4">
-            <p className="text-sm text-zinc-200">{schema.prompt}</p>
+            <p className="text-sm text-foreground">{schema.prompt}</p>
 
             {schema.mode === "order" ? (
                 <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -79,8 +79,8 @@ export function ScenarioBuilder({
             ) : (
                 <div className="grid gap-4 lg:grid-cols-2">
                     {(schema.categories ?? []).map((category) => (
-                        <div key={category} className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-4">
-                            <p className="text-sm font-semibold text-zinc-100">{category}</p>
+                        <div key={category} className="rounded-2xl border border-border bg-surface/75 p-4">
+                            <p className="text-sm font-semibold text-foreground">{category}</p>
                             <div className="mt-3 space-y-2">
                                 {schema.pieces.map((piece) => {
                                     const selected = categorized[piece.id] === category;
@@ -93,7 +93,7 @@ export function ScenarioBuilder({
                                                 setChecked(false);
                                                 onResolved(false);
                                             }}
-                                            className={`w-full rounded-xl border px-3 py-2 text-left text-sm ${selected ? "border-teal-400 bg-teal-500/15 text-teal-100" : "border-zinc-700 text-zinc-300"}`}
+                                            className={`w-full rounded-xl border px-3 py-2 text-left text-sm ${selected ? "border-accent-blue/45 bg-accent-blue/12 text-accent-blue" : "border-border text-muted"}`}
                                         >
                                             {piece.label}
                                         </button>
@@ -106,10 +106,10 @@ export function ScenarioBuilder({
             )}
 
             <div className="flex items-center gap-3">
-                <button type="button" onClick={verify} className="rounded-lg bg-teal-500 px-4 py-2 text-sm font-semibold text-zinc-950 hover:bg-teal-400">
+                <button type="button" onClick={verify} className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white hover:bg-accent-hover">
                     Verificar
                 </button>
-                {checked && <p className="text-sm text-zinc-300">{schema.explanation}</p>}
+                {checked && <p className="text-sm text-muted">{schema.explanation}</p>}
             </div>
         </div>
     );

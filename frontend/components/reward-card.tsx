@@ -35,22 +35,22 @@ const TYPE_LABELS: Record<string, string> = {
 };
 
 const TYPE_ICONS: Record<string, React.ReactNode> = {
-    VIDEO: <Sparkles className="h-8 w-8 text-teal-300" />,
-    QUIZ: <CheckSquare className="h-8 w-8 text-teal-300" />,
-    INTERACTIVE_FORM: <BookOpen className="h-8 w-8 text-teal-300" />,
-    SCENARIO_BUILDER: <Grip className="h-8 w-8 text-amber-300" />,
-    RULES_RADIAL: <Sparkles className="h-8 w-8 text-teal-300" />,
+    VIDEO: <Sparkles className="h-8 w-8 text-accent-blue" />,
+    QUIZ: <CheckSquare className="h-8 w-8 text-accent-blue" />,
+    INTERACTIVE_FORM: <BookOpen className="h-8 w-8 text-accent-blue" />,
+    SCENARIO_BUILDER: <Grip className="h-8 w-8 text-accent-coral" />,
+    RULES_RADIAL: <Sparkles className="h-8 w-8 text-accent-blue" />,
     MATCHING_GAME: <Unlink2 className="h-8 w-8 text-sky-300" />,
-    DIALOGUE_SIMULATOR: <MessageSquare className="h-8 w-8 text-violet-300" />,
-    ARTICLE: <BookOpen className="h-8 w-8 text-teal-300" />,
-    ACTION_TASK: <Zap className="h-8 w-8 text-amber-300" />,
+    DIALOGUE_SIMULATOR: <MessageSquare className="h-8 w-8 text-accent-purple" />,
+    ARTICLE: <BookOpen className="h-8 w-8 text-accent-blue" />,
+    ACTION_TASK: <Zap className="h-8 w-8 text-accent-coral" />,
 };
 
 const ICON_BG: Record<string, string> = {
-    SCENARIO_BUILDER: "bg-amber-500/15 border-amber-500/30",
+    SCENARIO_BUILDER: "bg-accent-coral/15 border-accent-coral/30",
     MATCHING_GAME: "bg-sky-500/15 border-sky-500/30",
-    DIALOGUE_SIMULATOR: "bg-violet-500/15 border-violet-500/30",
-    ACTION_TASK: "bg-amber-500/15 border-amber-500/30",
+    DIALOGUE_SIMULATOR: "bg-accent-purple/15 border-accent-purple/30",
+    ACTION_TASK: "bg-accent-coral/15 border-accent-coral/30",
 };
 
 function estimateMinutes(step: CareerPathStep): number {
@@ -67,8 +67,8 @@ export function RewardCard({ step, onAccept, onClose }: RewardCardProps) {
     const ct = step.content_type ?? "";
     const flavor = FLAVOR[ct] ?? "Uma atividade pensada especificamente para o seu momento de carreira.";
     const typeLabel = TYPE_LABELS[ct] ?? "Atividade";
-    const icon = TYPE_ICONS[ct] ?? <Star className="h-8 w-8 text-teal-300" />;
-    const iconBg = ICON_BG[ct] ?? "bg-teal-500/15 border-teal-500/30";
+    const icon = TYPE_ICONS[ct] ?? <Star className="h-8 w-8 text-accent-blue" />;
+    const iconBg = ICON_BG[ct] ?? "bg-accent-blue/15 border-accent-blue/30";
     const minutes = estimateMinutes(step);
     const stages = Math.max(1, step.chain_total_stages);
 
@@ -95,29 +95,29 @@ export function RewardCard({ step, onAccept, onClose }: RewardCardProps) {
             </div>
 
             {/* "Você vai ganhar" block */}
-            <div className="rounded-2xl border border-teal-700/30 bg-teal-500/5 p-4">
-                <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-teal-400">
+            <div className="rounded-2xl border border-accent-blue/30 bg-accent-blue/8 p-4">
+                <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-accent-blue">
                     Você vai ganhar
                 </p>
                 <ul className="space-y-2.5">
                     <li className="flex items-start gap-3">
-                        <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-teal-500/20 text-xs font-bold text-teal-300">
+                        <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-accent-blue/20 text-xs font-bold text-accent-blue">
                             <Zap className="h-3 w-3" />
                         </span>
                         <span className="text-sm text-foreground">
-                            <span className="font-semibold text-teal-300">+{stages * 12} XP</span> no seu perfil de carreira
+                            <span className="font-semibold text-accent-blue">+{stages * 12} XP</span> no seu perfil de carreira
                         </span>
                     </li>
                     {step.reward_description && (
                         <li className="flex items-start gap-3">
-                            <Award className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-400" />
+                            <Award className="mt-0.5 h-4 w-4 flex-shrink-0 text-accent-coral" />
                             <span className="text-sm text-foreground">
-                                Progresso em: <span className="font-semibold text-amber-300">{step.reward_description}</span>
+                                Progresso em: <span className="font-semibold text-accent-coral">{step.reward_description}</span>
                             </span>
                         </li>
                     )}
                     <li className="flex items-start gap-3">
-                        <ArrowRight className="mt-0.5 h-4 w-4 flex-shrink-0 text-teal-400" />
+                        <ArrowRight className="mt-0.5 h-4 w-4 flex-shrink-0 text-accent-blue" />
                         <span className="text-sm text-foreground">
                             Desbloqueio da próxima etapa do mapa
                         </span>

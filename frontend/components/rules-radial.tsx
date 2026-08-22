@@ -23,7 +23,7 @@ export function RulesRadial({ schema, onResolved }: { schema: RulesRadialSchema;
 
     return (
         <div className="relative mx-auto h-[28rem] max-w-3xl">
-            <div className="absolute left-1/2 top-1/2 z-10 flex h-28 w-28 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-teal-400/60 bg-teal-500/10 text-center text-sm font-semibold text-teal-100 shadow-[0_0_30px_rgba(20,184,166,0.25)]">
+            <div className="absolute left-1/2 top-1/2 z-10 flex h-28 w-28 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-accent-blue/60 bg-accent-blue/10 text-center text-sm font-semibold text-accent-blue shadow-[0_0_30px_rgba(75,123,236,0.28)]">
                 {schema.centerTitle}
             </div>
             {schema.rules.map((rule, index) => {
@@ -31,15 +31,15 @@ export function RulesRadial({ schema, onResolved }: { schema: RulesRadialSchema;
                 const position = POSITIONS[index % POSITIONS.length];
                 return (
                     <div key={rule.id} className={`absolute ${position} w-48`}>
-                        <div className="pointer-events-none absolute left-1/2 top-1/2 h-px w-20 -translate-x-1/2 border-t border-dashed border-teal-700/60" />
+                        <div className="pointer-events-none absolute left-1/2 top-1/2 h-px w-20 -translate-x-1/2 border-t border-dashed border-accent-blue/45" />
                         <button
                             type="button"
                             onClick={() => setReadIds((current) => (current.includes(rule.id) ? current : [...current, rule.id]))}
-                            className={`relative z-10 rounded-2xl border p-4 text-left transition ${isRead ? "border-emerald-400 bg-emerald-500/10" : "border-zinc-800 bg-zinc-950/85 hover:border-teal-400"}`}
+                            className={`relative z-10 rounded-2xl border p-4 text-left transition ${isRead ? "border-accent-mint/55 bg-accent-mint/12" : "border-border bg-surface/90 hover:border-accent-blue/45"}`}
                         >
-                            <p className="text-sm font-semibold text-zinc-100">{rule.title}</p>
-                            <p className="mt-2 text-xs text-zinc-300">{rule.description}</p>
-                            <p className={`mt-3 text-[11px] font-semibold ${isRead ? "text-emerald-300" : "text-teal-300"}`}>{isRead ? "Lida" : "Marcar como lida"}</p>
+                            <p className="text-sm font-semibold text-foreground">{rule.title}</p>
+                            <p className="mt-2 text-xs text-muted">{rule.description}</p>
+                            <p className={`mt-3 text-[11px] font-semibold ${isRead ? "text-accent-mint" : "text-accent-blue"}`}>{isRead ? "Lida" : "Marcar como lida"}</p>
                         </button>
                     </div>
                 );

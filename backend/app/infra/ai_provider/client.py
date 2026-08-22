@@ -11,15 +11,15 @@ class AIProviderClient:
     def __init__(self) -> None:
         self._settings = get_settings()
 
-    def generate(self, prompt: str) -> str:
+    def generate(self, prompt: str, fallback_response: str | None = None) -> str:
         if self._settings.openai_api_key:
             try:
                 return self._generate_with_openai(prompt)
             except Exception:
                 # Keep generation available in local/dev environments even if provider fails.
-                return self._generate_fallback(prompt)
+                return fallback_response if fallback_response is not None else self._generate_fallback(prompt)
 
-        return self._generate_fallback(prompt)
+        return fallback_response if fallback_response is not None else self._generate_fallback(prompt)
 
     def _generate_with_openai(self, prompt: str) -> str:
         payload = {

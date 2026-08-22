@@ -1,22 +1,39 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
+import { AiGuide } from "@/components/ai-guide";
 import { ConstellationView } from "@/components/constellation-view";
-import { extractApiMessage, isApiNotFound, useBackendApi } from "@/lib/api";
-import type { CareerPath, TrailTemplate } from "@/lib/types";
+import { extractApiMessage, useBackendApi } from "@/lib/api";
+import { useLatestOnboardingContextQuery, useMeQuery, useMyCareerPathsQuery, useTrailTemplatesQuery } from "@/lib/backend-queries";
+import type { CareerPath, GoalType, OnboardingContextResponse, TrailTemplate } from "@/lib/types";
+
+const GOAL_TEXT: Record<GoalType, string> = {
+    GROW_CURRENT_JOB: "crescer no emprego atual",
+    SWITCH_JOB: "trocar de emprego",
+    FIND_JOB_ABROAD: "buscar vaga fora do pais",
+    MOVE_ABROAD: "morar fora",
+};
 
 export default function ConstellacaoPage() {
     const api = useBackendApi();
-    const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [paths, setPaths] = useState<CareerPath[]>([]);
-    const [templates, setTemplates] = useState<TrailTemplate[]>([]);
-    const [hasSubscription, setHasSubscription] = useState(false);
     const [catalogOpen, setCatalogOpen] = useState(false);
     const [categoryFilter, setCategoryFilter] = useState<string>("all");
     const [addingTemplateId, setAddingTemplateId] = useState<string | null>(null);
+    const [showWhyModal, setShowWhyModal] = useState(false);
+
+    const meQuery = useMeQuery();
+    const pathsQuery = useMyCareerPathsQuery();
+    const templatesQuery = useTrailTemplatesQuery();
+    const contextQuery = useLatestOnboardingContextQuery();
+
+    const loading = meQuery.isLoading || pathsQuery.isLoading || templatesQuery.isLoading || contextQuery.isLoading;
+    const paths = pathsQuery.data ?? [];
+    const templates = templatesQuery.data ?? [];
+    const hasSubscription = meQuery.data?.has_active_subscription ?? false;
+    const onboardingContext: OnboardingContextResponse | null = contextQuery.data ?? null;
 
     const categories = useMemo(() => {
         const all = Array.from(new Set(templates.map((item) => item.category))).sort((a, b) => a.localeCompare(b));
@@ -31,51 +48,11 @@ export default function ConstellacaoPage() {
         return base.filter((item) => item.category === categoryFilter);
     }, [categoryFilter, templates]);
 
-    async function loadPaths() {
-        const careerPaths = await api.getMyCareerPaths().catch((e: unknown) => {
-            if (isApiNotFound(e)) return [] as CareerPath[];
-            throw e;
-        });
-        setPaths(careerPaths);
-    }
-
-    async function loadTemplates() {
-        const list = await api.listTrailTemplates();
-        setTemplates(list);
-    }
-
-    useEffect(() => {
-        let cancelled = false;
-        async function load() {
-            try {
-                const [me, careerPaths, trailTemplates] = await Promise.all([
-                    api.getMe(),
-                    api.getMyCareerPaths().catch((e: unknown) => {
-                        if (isApiNotFound(e)) return [] as CareerPath[];
-                        throw e;
-                    }),
-                    api.listTrailTemplates(),
-                ]);
-                if (!cancelled) {
-                    setHasSubscription(me.has_active_subscription);
-                    setPaths(careerPaths);
-                    setTemplates(trailTemplates);
-                }
-            } catch (e) {
-                if (!cancelled) setError(extractApiMessage(e, "Não foi possível carregar as trilhas."));
-            } finally {
-                if (!cancelled) setLoading(false);
-            }
-        }
-        void load();
-        return () => { cancelled = true; };
-    }, [api]);
-
     async function handleAddTemplate(templateId: string) {
         try {
             setAddingTemplateId(templateId);
             await api.addTrailTemplate(templateId);
-            await Promise.all([loadPaths(), loadTemplates()]);
+            await Promise.all([pathsQuery.mutate(), templatesQuery.mutate()]);
             setCatalogOpen(false);
         } catch (e) {
             setError(extractApiMessage(e, "Não foi possível adicionar a trilha."));
@@ -83,6 +60,9 @@ export default function ConstellacaoPage() {
             setAddingTemplateId(null);
         }
     }
+
+    const queryError = meQuery.error ?? pathsQuery.error ?? templatesQuery.error ?? contextQuery.error;
+    const resolvedError = error ?? (queryError ? extractApiMessage(queryError, "Não foi possível carregar as trilhas.") : null);
 
     if (loading) {
         return (
@@ -92,12 +72,18 @@ export default function ConstellacaoPage() {
         );
     }
 
-    if (error) {
-        return <p className="rounded-xl border border-rose-900/60 bg-rose-950/40 p-4 text-sm text-rose-200">{error}</p>;
+    if (resolvedError) {
+        return <p className="rounded-xl border border-rose-900/60 bg-rose-950/40 p-4 text-sm text-rose-200">{resolvedError}</p>;
     }
 
     return (
         <div className="space-y-3">
+            <AiGuide
+                tipId="constelacao-first"
+                trigger={!loading && paths.length > 0}
+                message="Cada planeta e uma trilha. Clique para entrar e seguir seu proximo passo."
+            />
+
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-xl font-black text-foreground">Minhas Trilhas</h1>
@@ -107,9 +93,57 @@ export default function ConstellacaoPage() {
                     Ver resumo →
                 </Link>
             </div>
+            <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border bg-surface/45 px-3 py-2 text-xs">
+                <span className="rounded-full border border-accent-blue/35 bg-accent-blue/10 px-2.5 py-1 font-semibold text-accent-blue">Base curada</span>
+                <span className="rounded-full border border-accent-purple/35 bg-accent-purple/10 px-2.5 py-1 font-semibold text-accent-purple">Personalizado por IA</span>
+                <button
+                    type="button"
+                    className="ml-auto text-accent-blue hover:text-accent-hover"
+                    onClick={() => setShowWhyModal(true)}
+                >
+                    Por que estou vendo essas trilhas?
+                </button>
+            </div>
             <div className="h-[calc(100vh-11rem)]">
                 <ConstellationView paths={paths} hasSubscription={hasSubscription} onAddTrail={() => setCatalogOpen(true)} />
             </div>
+
+            {showWhyModal && (
+                <div className="fixed inset-0 z-50 bg-black/45 p-4" onClick={() => setShowWhyModal(false)}>
+                    <div
+                        className="mx-auto mt-16 w-full max-w-xl rounded-2xl border border-border bg-background p-5"
+                        onClick={(event) => event.stopPropagation()}
+                    >
+                        <div className="flex items-start justify-between gap-3">
+                            <div>
+                                <p className="text-xs uppercase tracking-widest text-muted">Transparencia</p>
+                                <h2 className="mt-1 text-lg font-black text-foreground">Como escolhemos suas trilhas</h2>
+                            </div>
+                            <button
+                                type="button"
+                                className="rounded-lg border border-border px-2 py-1 text-xs text-muted hover:text-foreground"
+                                onClick={() => setShowWhyModal(false)}
+                            >
+                                Fechar
+                            </button>
+                        </div>
+
+                        <div className="mt-4 space-y-3 text-sm text-muted">
+                            <p>
+                                As trilhas de <span className="font-semibold text-accent-blue">Base curada</span> vem de modelos validados para acelerar seu inicio com passos praticos.
+                            </p>
+                            <p>
+                                As trilhas <span className="font-semibold text-accent-purple">Personalizado por IA</span> combinam seu objetivo e contexto para priorizar etapas mais aderentes ao seu momento.
+                            </p>
+                            {onboardingContext && (
+                                <p className="rounded-xl border border-border bg-surface/55 p-3 text-foreground">
+                                    Hoje, seu perfil base considera quem atua como <span className="font-semibold">{onboardingContext.current_job}</span>, com foco em <span className="font-semibold">{GOAL_TEXT[onboardingContext.goal]}</span> dentro de <span className="font-semibold">{onboardingContext.career_type}</span>.
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {catalogOpen && (
                 <div className="fixed inset-0 z-50 bg-black/50 p-4" onClick={() => setCatalogOpen(false)}>

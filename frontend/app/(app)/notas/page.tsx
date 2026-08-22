@@ -2,47 +2,37 @@
 
 import { ArrowLeft, ExternalLink, Plus, Search, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { NoteEditor } from "@/components/note-editor";
 import { extractApiMessage, useBackendApi } from "@/lib/api";
+import { useNotesQuery } from "@/lib/backend-queries";
 import type { Note } from "@/lib/types";
 
 export default function NotasPage() {
     const api = useBackendApi();
-    const [notes, setNotes] = useState<Note[]>([]);
-    const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [query, setQuery] = useState("");
+    const [debouncedQuery, setDebouncedQuery] = useState("");
     const [selectedNote, setSelectedNote] = useState<Note | null>(null);
     const [creating, setCreating] = useState(false);
     const searchDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-    const loadNotes = useCallback(async (q?: string) => {
-        setError(null);
-        try {
-            const data = await api.getNotes(q);
-            setNotes(data);
-        } catch (e) {
-            setError(extractApiMessage(e, "Não foi possível carregar as anotações."));
-        } finally {
-            setLoading(false);
-        }
-    }, [api]);
-
-    useEffect(() => { void loadNotes(); }, [loadNotes]);
+    const notesQuery = useNotesQuery(debouncedQuery || undefined);
+    const notes = notesQuery.data ?? [];
+    const loading = notesQuery.isLoading;
+    const resolvedError = error ?? (notesQuery.error ? extractApiMessage(notesQuery.error, "Não foi possível carregar as anotações.") : null);
 
     function handleQueryChange(value: string) {
         setQuery(value);
         if (searchDebounce.current) clearTimeout(searchDebounce.current);
-        searchDebounce.current = setTimeout(() => loadNotes(value || undefined), 300);
+        searchDebounce.current = setTimeout(() => setDebouncedQuery(value), 300);
     }
 
     async function handleCreate() {
         setCreating(true);
         try {
             const note = await api.createNote("", undefined);
-            setNotes((prev) => [note, ...prev]);
+            await notesQuery.mutate((prev) => [note, ...(prev ?? [])], false);
             setSelectedNote(note);
         } catch (e) {
             setError(extractApiMessage(e, "Não foi possível criar a anotação."));
@@ -53,13 +43,13 @@ export default function NotasPage() {
 
     async function handleSave(noteId: string, content: string) {
         const updated = await api.updateNote(noteId, content);
-        setNotes((prev) => prev.map((n) => n.id === noteId ? updated : n));
+        await notesQuery.mutate((prev) => (prev ?? []).map((n) => n.id === noteId ? updated : n), false);
         setSelectedNote((prev) => prev?.id === noteId ? updated : prev);
     }
 
     async function handleDelete(noteId: string) {
         await api.deleteNote(noteId);
-        setNotes((prev) => prev.filter((n) => n.id !== noteId));
+        await notesQuery.mutate((prev) => (prev ?? []).filter((n) => n.id !== noteId), false);
         if (selectedNote?.id === noteId) setSelectedNote(null);
     }
 
@@ -101,8 +91,8 @@ export default function NotasPage() {
                     </button>
                 </div>
 
-                {error && (
-                    <p className="rounded-xl border border-rose-900/60 bg-rose-950/40 px-3 py-2 text-xs text-rose-200">{error}</p>
+                {resolvedError && (
+                    <p className="rounded-xl border border-rose-900/60 bg-rose-950/40 px-3 py-2 text-xs text-rose-200">{resolvedError}</p>
                 )}
 
                 {/* Note list */}
@@ -124,7 +114,7 @@ export default function NotasPage() {
                                 </p>
                                 <p className="mt-0.5 line-clamp-2 text-[11px] text-muted">{preview(note.content)}</p>
                                 {note.step_title && (
-                                    <span className="mt-1.5 inline-block rounded-full border border-teal-700/40 bg-teal-500/10 px-2 py-0.5 text-[10px] text-teal-300">
+                                    <span className="mt-1.5 inline-block rounded-full border border-accent-blue/40 bg-accent-blue/10 px-2 py-0.5 text-[10px] text-accent-blue">
                                         {note.step_title}
                                     </span>
                                 )}
@@ -145,7 +135,7 @@ export default function NotasPage() {
                                 </p>
                                 {selectedNote.step_title && (
                                     <p className="mt-0.5 text-[11px] text-muted">
-                                        Vinculada a: <span className="text-teal-300">{selectedNote.step_title}</span>
+                                        Vinculada a: <span className="text-accent-blue">{selectedNote.step_title}</span>
                                     </p>
                                 )}
                             </div>

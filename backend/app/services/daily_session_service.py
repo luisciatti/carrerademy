@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from datetime import date, datetime, timezone
 
 from sqlalchemy import desc, func, select
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.orm import Session, load_only, selectinload
 
 from app.domain.enums import CareerPathStatus, ContentItemType, DailyObjectiveType, PathStepStatus, SubscriptionStatus
 from app.domain.models import CareerPath, ContentItem, DailyActivityLog, PathStep, Subscription, User, UserProgress
@@ -126,6 +126,8 @@ def _objective_review(db: Session, user: User, completed_today: set[DailyObjecti
             UserProgress.user_id == user.id,
             UserProgress.completed_at.isnot(None),
         )
+        .order_by(UserProgress.completed_at.desc())
+        .limit(200)
     )
     completed_ids = list(completed_step_ids)
     if not completed_ids:
@@ -176,10 +178,13 @@ def _objective_bonus(db: Session, user: User, has_sub: bool, completed_today: se
     user_career_tag = f"career-type:{onboarding.career_type.value.lower()}" if onboarding else None
 
     candidates = list(db.scalars(
-        select(ContentItem).where(
+        select(ContentItem)
+        .options(load_only(ContentItem.id, ContentItem.type, ContentItem.title, ContentItem.description, ContentItem.tags))
+        .where(
             ContentItem.type.in_(bonus_types),
             ContentItem.is_active.is_(True),
         )
+        .limit(250)
     ))
 
     if not candidates:

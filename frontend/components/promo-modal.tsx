@@ -70,7 +70,7 @@ export function PromoModal({ me }: PromoModalProps) {
                 aria-modal="true"
                 aria-label="Codigo promocional"
                 onClick={(e) => e.stopPropagation()}
-                className="relative w-full max-w-lg rounded-2xl border border-teal-800/50 bg-background shadow-[0_20px_80px_rgba(0,0,0,0.6)]"
+                className="relative w-full max-w-lg rounded-2xl border border-accent-purple/35 bg-background shadow-[0_20px_80px_rgba(31,22,48,0.42)]"
             >
                 <button
                     type="button"
@@ -82,7 +82,7 @@ export function PromoModal({ me }: PromoModalProps) {
                 </button>
 
                 <div className="p-6">
-                    <span className="rounded-full bg-teal-500/20 px-3 py-1 text-xs font-bold uppercase tracking-widest text-teal-300">
+                    <span className="rounded-full bg-accent-blue/20 px-3 py-1 text-xs font-bold uppercase tracking-widest text-accent-blue">
                         PROMO CODE
                     </span>
                     <h2 className="mt-3 text-2xl font-black text-foreground">
@@ -90,12 +90,12 @@ export function PromoModal({ me }: PromoModalProps) {
                     </h2>
                     <p className="mt-1 text-sm text-muted">{remaining}</p>
 
-                    <div className="mt-4 flex items-center gap-3 rounded-xl border border-teal-700/40 bg-teal-950/30 px-4 py-3">
-                        <code className="flex-1 text-lg font-bold tracking-widest text-teal-200">{PROMO_CODE}</code>
+                    <div className="mt-4 flex items-center gap-3 rounded-xl border border-accent-blue/35 bg-accent-blue/10 px-4 py-3">
+                        <code className="flex-1 text-lg font-bold tracking-widest text-accent-blue">{PROMO_CODE}</code>
                         <button
                             type="button"
                             onClick={copyCode}
-                            className="flex items-center gap-1.5 rounded-lg bg-teal-500 px-3 py-1.5 text-sm font-semibold text-zinc-950 hover:bg-teal-400"
+                            className="flex items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5 text-sm font-semibold text-white hover:bg-accent-hover"
                         >
                             <Copy className="h-3.5 w-3.5" />
                             {copied ? "Copiado!" : "Copiar"}
@@ -110,7 +110,7 @@ export function PromoModal({ me }: PromoModalProps) {
                             "O desconto e aplicado automaticamente antes do pagamento.",
                         ].map((step, idx) => (
                             <div key={step} className="flex items-start gap-3">
-                                <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-teal-500/20 text-xs font-bold text-teal-300">
+                                <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-accent-blue/20 text-xs font-bold text-accent-blue">
                                     {idx + 1}
                                 </span>
                                 <p className="text-sm text-muted">{step}</p>
@@ -124,7 +124,7 @@ export function PromoModal({ me }: PromoModalProps) {
 
                     <a
                         href="/paywall"
-                        className="mt-5 block rounded-xl bg-teal-500 py-3 text-center text-sm font-bold text-zinc-950 hover:bg-teal-400"
+                        className="mt-5 block rounded-xl bg-accent py-3 text-center text-sm font-bold text-white hover:bg-accent-hover"
                     >
                         Assinar agora com {PROMO_DISCOUNT} de desconto
                     </a>

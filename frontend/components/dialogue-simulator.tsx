@@ -36,25 +36,25 @@ export function DialogueSimulator({ schema, onResolved }: DialogueSimulatorProps
 
     return (
         <div className="space-y-4">
-            <p className="text-sm font-semibold text-zinc-100">{schema.title}</p>
+            <p className="text-sm font-semibold text-foreground">{schema.title}</p>
 
             {outcome ? (
-                <div className="space-y-3 rounded-2xl border border-emerald-700/50 bg-emerald-950/30 p-4">
-                    <p className="text-sm font-semibold text-emerald-200">{outcome.title}</p>
-                    <p className="text-sm text-zinc-200">{outcome.evaluation}</p>
+                <div className="space-y-3 rounded-2xl border border-accent-mint/45 bg-accent-mint/12 p-4">
+                    <p className="text-sm font-semibold text-accent-mint">{outcome.title}</p>
+                    <p className="text-sm text-foreground">{outcome.evaluation}</p>
                     <button
                         type="button"
                         onClick={restart}
-                        className="rounded-lg border border-zinc-700 px-3 py-2 text-sm text-zinc-200 hover:border-zinc-500"
+                        className="rounded-lg border border-border px-3 py-2 text-sm text-foreground hover:border-accent-blue/45"
                     >
                         Tentar outro caminho
                     </button>
                 </div>
             ) : currentNode ? (
-                <div className="space-y-4 rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4">
+                <div className="space-y-4 rounded-2xl border border-border bg-surface/80 p-4">
                     <div>
-                        <p className="text-xs uppercase tracking-wider text-zinc-500">{currentNode.speaker}</p>
-                        <p className="mt-2 text-sm text-zinc-100">{currentNode.text}</p>
+                        <p className="text-xs uppercase tracking-wider text-muted">{currentNode.speaker}</p>
+                        <p className="mt-2 text-sm text-foreground">{currentNode.text}</p>
                     </div>
                     <div className="grid gap-2">
                         {currentNode.options.map((option) => (
@@ -62,7 +62,7 @@ export function DialogueSimulator({ schema, onResolved }: DialogueSimulatorProps
                                 key={option.id}
                                 type="button"
                                 onClick={() => choose(option)}
-                                className="rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-left text-sm text-zinc-200 transition hover:border-teal-400 hover:bg-teal-500/10"
+                                className="rounded-lg border border-border bg-background px-3 py-2 text-left text-sm text-foreground transition hover:border-accent-blue/45 hover:bg-accent-blue/8"
                             >
                                 {option.label}
                             </button>
@@ -70,7 +70,7 @@ export function DialogueSimulator({ schema, onResolved }: DialogueSimulatorProps
                     </div>
                 </div>
             ) : (
-                <p className="text-sm text-zinc-300">Simulador indisponivel.</p>
+                <p className="text-sm text-muted">Simulador indisponivel.</p>
             )}
         </div>
     );

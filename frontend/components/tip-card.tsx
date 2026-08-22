@@ -54,10 +54,10 @@ export function TipCard({ pathTitle }: TipCardProps) {
     const tip = TIPS[key] ?? TIPS.other;
 
     return (
-        <aside className="flex items-start gap-3 rounded-2xl border border-amber-700/30 bg-amber-500/5 px-4 py-3">
-            <Lightbulb className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-400" />
+        <aside className="flex items-start gap-3 rounded-2xl border border-accent-coral/35 bg-accent-coral/8 px-4 py-3">
+            <Lightbulb className="mt-0.5 h-4 w-4 flex-shrink-0 text-accent-coral" />
             <div>
-                <p className="text-xs font-semibold text-amber-300">{tip.title}</p>
+                <p className="text-xs font-semibold text-accent-coral">{tip.title}</p>
                 <p className="mt-0.5 text-xs leading-relaxed text-muted">{tip.body}</p>
             </div>
         </aside>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { JetBrains_Mono, Space_Grotesk } from "next/font/google";
 
 import { ClerkProviderThemed } from "@/components/clerk-provider-themed";
+import { SwrProvider } from "@/components/swr-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 
@@ -29,9 +30,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <ThemeProvider>
-          <ClerkProviderThemed>
-            {children}
-          </ClerkProviderThemed>
+          <SwrProvider>
+            <ClerkProviderThemed>
+              {children}
+            </ClerkProviderThemed>
+          </SwrProvider>
         </ThemeProvider>
       </body>
     </html>

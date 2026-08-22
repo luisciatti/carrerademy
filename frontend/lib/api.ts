@@ -8,11 +8,16 @@ import type {
     CareerPath,
     CompleteStepResponse,
     DailySessionResponse,
+    IdentityStatementResponse,
     LeaderboardEntry,
     MeResponse,
     Note,
+    OnboardingDraftResponse,
+    OnboardingContextResponse,
+    OnboardingExploreResponse,
     OnboardingPayload,
     OnboardingResponse,
+    PaywallTeaserResponse,
     ProfileResponse,
     TrailTemplate,
 } from "./types";
@@ -29,6 +34,38 @@ export function useBackendApi() {
             return fetcher<OnboardingResponse>("/api/v1/onboarding", {
                 method: "POST",
                 body: JSON.stringify(payload),
+            });
+        },
+
+        async upsertOnboardingDraft(payload: OnboardingPayload, onboardingId?: string | null) {
+            const qs = onboardingId ? `?onboarding_id=${encodeURIComponent(onboardingId)}` : "";
+            return fetcher<OnboardingDraftResponse>(`/api/v1/onboarding/draft${qs}`, {
+                method: "POST",
+                body: JSON.stringify(payload),
+            });
+        },
+
+        async exploreFromOnboarding(onboardingId: string) {
+            return fetcher<OnboardingExploreResponse>(`/api/v1/onboarding/${onboardingId}/explore`, {
+                method: "POST",
+            });
+        },
+
+        async getLatestOnboardingContext() {
+            return fetcher<OnboardingContextResponse>("/api/v1/onboarding/context/latest");
+        },
+
+        async getPaywallTeaser() {
+            return fetcher<PaywallTeaserResponse>("/api/v1/onboarding/paywall/teaser");
+        },
+
+        async getIdentityStatement(onboardingId: string) {
+            return fetcher<IdentityStatementResponse>(`/api/v1/onboarding/${onboardingId}/identity-statement`);
+        },
+
+        async regenerateIdentityStatement(onboardingId: string) {
+            return fetcher<IdentityStatementResponse>(`/api/v1/onboarding/${onboardingId}/identity-statement`, {
+                method: "POST",
             });
         },
 

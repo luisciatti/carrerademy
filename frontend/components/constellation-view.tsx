@@ -14,12 +14,12 @@ function lcg(n: number): number {
     return ((n * 1664525 + 1013904223) >>> 0) / 0x100000000;
 }
 
-const STARS = Array.from({ length: 120 }, (_, i) => ({
+const STARS = Array.from({ length: 70 }, (_, i) => ({
     x: lcg(i * 3) * 100,
     y: lcg(i * 3 + 1) * 100,
     size: lcg(i * 3 + 2) < 0.55 ? 1 : lcg(i * 3 + 2) < 0.85 ? 1.5 : 2,
     opacity: 0.22 + lcg(i * 7) * 0.45,
-    twinkle: i % 5 === 0,
+    twinkle: i % 9 === 0,
     delay: lcg(i * 11) * 2.5,
     duration: 2.2 + lcg(i * 13) * 2,
 }));
@@ -64,7 +64,7 @@ function ProgressRing({ kind, pct, color }: { kind: string; pct: number; color: 
             <circle
                 cx={cx} cy={cx} r={r}
                 fill="none"
-                stroke="rgba(255,255,255,0.08)"
+                stroke="rgba(122,117,133,0.16)"
                 strokeWidth={ringStroke}
             />
             {/* Progress arc — only drawn when there is actual progress */}
@@ -154,33 +154,33 @@ function getTokens(trail: CareerPath, hasSubscription: boolean): Tokens {
     const isLocked = isAI && !hasSubscription && !isGenerating;
 
     if (isGenerating) return {
-        bodyGradient: "from-teal-600 to-cyan-950",
-        glow: "0 0 22px 6px rgba(20,184,166,0.45), 0 0 44px 12px rgba(6,182,212,0.15)",
-        ringColor: "#14b8a6",
-        labelCls: "text-teal-200",
+        bodyGradient: "from-[color:var(--accent-blue)] to-[color:var(--accent-purple)]",
+        glow: "0 0 24px 8px rgba(75,123,236,0.18)",
+        ringColor: "#4B7BEC",
+        labelCls: "text-foreground",
         dim: false, generating: true, locked: false,
     };
     if (isLocked) return {
-        bodyGradient: "from-zinc-700 to-zinc-900",
-        glow: "0 0 10px 2px rgba(120,120,130,0.25)",
-        ringColor: "#52525b",
-        labelCls: "text-zinc-400",
+        bodyGradient: "from-white to-[color:var(--surface-hover)]",
+        glow: "0 0 0 rgba(0,0,0,0)",
+        ringColor: "#D8D0E6",
+        labelCls: "text-muted",
         dim: true, generating: false, locked: true,
     };
     if (isAI) return {
         // Primary / brighter teal: the centrepiece planet
-        bodyGradient: "from-teal-400 to-teal-800",
-        glow: "0 0 36px 10px rgba(20,184,166,0.6), 0 0 72px 20px rgba(20,184,166,0.22)",
-        ringColor: "#2dd4bf",
-        labelCls: "text-teal-100",
+        bodyGradient: "from-[color:var(--accent-purple)] to-[color:var(--accent-blue)]",
+        glow: "0 0 28px 8px rgba(155,114,242,0.22)",
+        ringColor: "#9B72F2",
+        labelCls: "text-foreground",
         dim: false, generating: false, locked: false,
     };
     // STANDARD_SOFT_SKILLS: cooler/deeper teal — same family, distinct enough
     return {
-        bodyGradient: "from-teal-600 to-slate-800",
-        glow: "0 0 22px 6px rgba(20,184,166,0.38), 0 0 44px 10px rgba(20,184,166,0.12)",
-        ringColor: "#14b8a6",
-        labelCls: "text-teal-200",
+        bodyGradient: "from-[color:var(--accent-mint)] to-[color:var(--accent-blue)]",
+        glow: "0 0 24px 7px rgba(46,217,165,0.16)",
+        ringColor: "#2ED9A5",
+        labelCls: "text-foreground",
         dim: false, generating: false, locked: false,
     };
 }
@@ -195,6 +195,7 @@ function Planet({ placed, pct, hasSubscription, onClick }: {
 }) {
     const { trail, cx, cy } = placed;
     const tk = getTokens(trail, hasSubscription);
+    const originLabel = trail.kind === "AI_PERSONALIZED" ? "Personalizado por IA" : "Base curada";
     const { bodySize, ringGap, ringStroke } = kCfg(trail.kind);
     const ws = wrapSize(trail.kind);
 
@@ -231,13 +232,13 @@ function Planet({ placed, pct, hasSubscription, onClick }: {
                     boxShadow: tk.glow,
                 }}
             >
-                {tk.generating && <Loader2 className="h-6 w-6 animate-spin text-teal-200" />}
-                {tk.locked && <Lock className="h-5 w-5 text-amber-400" />}
+                {tk.generating && <Loader2 className="h-6 w-6 animate-spin text-white" />}
+                {tk.locked && <Lock className="h-5 w-5 text-[color:var(--accent-coral)]" />}
 
                 {/* Pulse ring on generating state */}
                 {tk.generating && (
                     <motion.span
-                        className="absolute inset-0 rounded-full border-2 border-teal-400/50"
+                        className="absolute inset-0 rounded-full border-2 border-[color:var(--accent-purple)]/35"
                         animate={{ scale: [1, 1.4, 1], opacity: [0.5, 0, 0.5] }}
                         transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
                     />
@@ -249,6 +250,7 @@ function Planet({ placed, pct, hasSubscription, onClick }: {
                 className="pointer-events-none absolute w-max max-w-[180px] text-center"
                 style={{ left: ws / 2, top: ws + 8, transform: "translateX(-50%)" }}
             >
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-muted">{originLabel}</p>
                 <p className={`text-xs font-bold leading-tight ${tk.labelCls} ${tk.dim ? "opacity-60" : ""}`}>
                     {trail.title}
                 </p>
@@ -285,7 +287,7 @@ function ConnectionLines({ placed, w, h }: { placed: Placed[]; w: number; h: num
                     key={idx}
                     x1={a.cx} y1={a.cy}
                     x2={b.cx} y2={b.cy}
-                    stroke="rgba(255,255,255,0.13)"
+                    stroke="rgba(122,117,133,0.18)"
                     strokeWidth="1"
                     strokeLinecap="round"
                 />
@@ -335,8 +337,10 @@ export function ConstellationView({ paths, hasSubscription, onAddTrail }: Conste
     return (
         <motion.div
             ref={containerRef}
-            className="relative h-full w-full overflow-hidden rounded-2xl border border-border/30"
-            style={{ background: "radial-gradient(ellipse 80% 60% at 50% 40%, #0c1e38 0%, #030609 100%)" }}
+            className="relative h-full w-full overflow-hidden rounded-3xl border border-white/30 shadow-[0_22px_50px_rgba(99,78,117,0.08)]"
+            style={{
+                background: "linear-gradient(135deg, var(--background-gradient-start), var(--background-gradient-end))",
+            }}
             animate={{ opacity: exiting ? 0 : 1, scale: exiting ? 1.06 : 1 }}
             transition={{ duration: 0.35 }}
         >
@@ -346,7 +350,7 @@ export function ConstellationView({ paths, hasSubscription, onAddTrail }: Conste
                     <motion.div
                         key={i}
                         aria-hidden
-                        className="absolute rounded-full bg-white"
+                        className="absolute rounded-full bg-white/60"
                         style={{ left: `${s.x}%`, top: `${s.y}%`, width: s.size, height: s.size }}
                         initial={{ opacity: s.opacity }}
                         animate={{ opacity: [s.opacity, s.opacity * 0.15, s.opacity] }}
@@ -356,7 +360,7 @@ export function ConstellationView({ paths, hasSubscription, onAddTrail }: Conste
                     <div
                         key={i}
                         aria-hidden
-                        className="absolute rounded-full bg-white"
+                        className="absolute rounded-full bg-white/45"
                         style={{ left: `${s.x}%`, top: `${s.y}%`, width: s.size, height: s.size, opacity: s.opacity }}
                     />
                 )
@@ -387,7 +391,7 @@ export function ConstellationView({ paths, hasSubscription, onAddTrail }: Conste
                 <motion.button
                     type="button"
                     onClick={onAddTrail}
-                    className="absolute flex h-16 w-16 items-center justify-center rounded-full border border-teal-400/45 bg-teal-500/15 text-teal-100 transition hover:scale-105 hover:bg-teal-500/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                    className="absolute flex h-16 w-16 items-center justify-center rounded-full bg-white/90 text-[color:var(--accent-purple)] shadow-[0_16px_36px_rgba(155,114,242,0.16)] transition hover:scale-105 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent-purple)]"
                     style={{ left: dims.w / 2 - 32, top: Math.max(18, dims.h - 92) }}
                     initial={{ opacity: 0, scale: 0.5 }}
                     animate={{ opacity: 1, scale: 1 }}

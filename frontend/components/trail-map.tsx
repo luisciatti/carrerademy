@@ -18,10 +18,10 @@ type TrailMapProps = {
 const BONUS_TYPES = new Set(["SCENARIO_BUILDER", "MATCHING_GAME", "DIALOGUE_SIMULATOR", "RULES_RADIAL"]);
 
 const BONUS_COLORS: Record<string, { ring: string; bg: string; text: string }> = {
-    DIALOGUE_SIMULATOR: { ring: "border-violet-500/60", bg: "bg-violet-500/15", text: "text-violet-300" },
-    SCENARIO_BUILDER: { ring: "border-amber-500/60", bg: "bg-amber-500/15", text: "text-amber-300" },
-    MATCHING_GAME: { ring: "border-sky-500/60", bg: "bg-sky-500/15", text: "text-sky-300" },
-    RULES_RADIAL: { ring: "border-teal-500/60", bg: "bg-teal-500/15", text: "text-teal-300" },
+    DIALOGUE_SIMULATOR: { ring: "border-accent-purple/60", bg: "bg-accent-purple/15", text: "text-accent-purple" },
+    SCENARIO_BUILDER: { ring: "border-accent-coral/60", bg: "bg-accent-coral/15", text: "text-accent-coral" },
+    MATCHING_GAME: { ring: "border-accent-blue/60", bg: "bg-accent-blue/15", text: "text-accent-blue" },
+    RULES_RADIAL: { ring: "border-accent-mint/60", bg: "bg-accent-mint/15", text: "text-accent-mint" },
 };
 
 function nodeIcon(type: string | null, small?: boolean) {
@@ -75,11 +75,11 @@ export function TrailMap({ steps, activeStepId, onSelectStep }: TrailMapProps) {
 
                     const nodeSize = isBonus ? "h-11 w-11" : "h-16 w-16";
                     const nodeBorder = isCompleted
-                        ? "border-emerald-400 bg-emerald-500/20 text-emerald-300"
+                        ? "border-accent-mint/60 bg-accent-mint/20 text-accent-mint"
                         : isUnlocked
-                            ? "border-teal-400 bg-teal-500/20 text-teal-200 shadow-[0_0_28px_rgba(20,184,166,0.4)]"
+                            ? "border-accent-blue/60 bg-accent-blue/20 text-accent-blue shadow-[0_0_28px_rgba(75,123,236,0.34)]"
                             : step.is_description_locked
-                                ? "border-amber-600/50 bg-amber-500/10 text-amber-400"
+                                ? "border-accent-coral/55 bg-accent-coral/12 text-accent-coral"
                                 : isBonus && bonusColors
                                     ? `${bonusColors.ring} ${bonusColors.bg} ${bonusColors.text}`
                                     : "border-border bg-surface text-muted";
@@ -87,7 +87,7 @@ export function TrailMap({ steps, activeStepId, onSelectStep }: TrailMapProps) {
                     const nodeHover = !canOpen
                         ? "cursor-not-allowed opacity-60"
                         : isUnlocked
-                            ? "cursor-pointer hover:scale-105 hover:shadow-[0_0_20px_rgba(20,184,166,0.35)]"
+                            ? "cursor-pointer hover:scale-105 hover:shadow-[0_0_20px_rgba(75,123,236,0.3)]"
                             : "cursor-pointer hover:scale-105";
 
                     const cardMaxW = isBonus
@@ -143,7 +143,7 @@ export function TrailMap({ steps, activeStepId, onSelectStep }: TrailMapProps) {
                                         </span>
                                     )}
                                     {step.is_description_locked && isLocked && (
-                                        <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-[8px] font-black text-zinc-950">
+                                        <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-accent-coral text-[8px] font-black text-white">
                                             $
                                         </span>
                                     )}

@@ -1,3 +1,4 @@
+from datetime import date, datetime
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -15,11 +16,67 @@ class OnboardingCreate(BaseModel):
 
 
 class OnboardingCreateResponse(BaseModel):
+	onboarding_response_id: UUID
+	standard_career_path_id: UUID
+	ai_career_path_id: UUID
+	standard_status: str
+	ai_status: str
+	identity_statement: str
+	identity_statement_generated_at: datetime | None
+	message: str
+
+
+class IdentityStatementResponse(BaseModel):
+	onboarding_response_id: UUID
+	identity_statement: str
+	identity_statement_generated_at: datetime | None
+
+
+class OnboardingDraftResponse(BaseModel):
+	onboarding_response_id: UUID
+	identity_statement: str
+	identity_statement_generated_at: datetime | None
+
+
+class OnboardingExploreResponse(BaseModel):
+	onboarding_response_id: UUID
 	standard_career_path_id: UUID
 	ai_career_path_id: UUID
 	standard_status: str
 	ai_status: str
 	message: str
+
+
+class OnboardingContextResponse(BaseModel):
+	onboarding_response_id: UUID
+	career_type: str
+	goal: str
+	current_job: str
+	dream_job: str | None
+	weekly_time_availability: int
+	identity_statement: str
+
+
+class SalaryBenchmarkTeaserResponse(BaseModel):
+	role_title: str
+	region: str
+	visible_salary_min: int
+	visible_salary_max_hint: str
+	masked_salary_range: str
+	source: str
+	updated_at: date
+
+
+class LiveJobsTeaserResponse(BaseModel):
+	provider: str
+	search_query: str
+	search_url: str
+
+
+class PaywallTeaserResponse(BaseModel):
+	onboarding_context: OnboardingContextResponse
+	salary_benchmark: SalaryBenchmarkTeaserResponse | None
+	live_jobs: LiveJobsTeaserResponse
 
 
 class ContentStageView(BaseModel):

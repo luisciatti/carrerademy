@@ -64,6 +64,12 @@ npm run dev
 - Frontend: `http://localhost:3000`
 - Backend health: `http://localhost:8000/health`
 
+No PowerShell, prefira `curl.exe` (ou `Invoke-RestMethod`) para evitar o aviso de parsing do alias `curl`:
+
+```powershell
+curl.exe http://localhost:8000/health
+```
+
 ### 2) Modo completo (stack inteira)
 
 Use para validar a stack completa antes de deploy, ensaios de demonstração e testes integrados de execução containerizada.

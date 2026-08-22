@@ -4,7 +4,7 @@ import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func, or_, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.core.deps import get_current_user, get_db
 from app.domain.models import Note, PathStep, User
@@ -40,7 +40,7 @@ def list_notes(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> list[dict]:
-    query = select(Note).where(Note.user_id == current_user.id)
+    query = select(Note).options(selectinload(Note.path_step)).where(Note.user_id == current_user.id)
     if q:
         pattern = f"%{q}%"
         query = query.where(

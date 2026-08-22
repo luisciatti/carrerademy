@@ -44,10 +44,25 @@ class OnboardingResponse(Base):
     goal: Mapped[GoalType] = mapped_column(SQLEnum(GoalType, name="goal_type"), nullable=False)
     experience_level: Mapped[str] = mapped_column(String(100), nullable=False)
     weekly_time_availability: Mapped[int] = mapped_column(Integer, nullable=False)
+    identity_statement: Mapped[str | None] = mapped_column(Text, nullable=True)
+    identity_statement_generated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     user: Mapped[User] = relationship(back_populates="onboarding_responses")
     career_paths: Mapped[list["CareerPath"]] = relationship(back_populates="onboarding_response", cascade="all, delete-orphan")
+
+
+class SalaryBenchmark(Base):
+    __tablename__ = "salary_benchmarks"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    role_title: Mapped[str] = mapped_column(String(255), nullable=False)
+    career_type: Mapped[CareerType] = mapped_column(SQLEnum(CareerType, name="career_type"), nullable=False, index=True)
+    region: Mapped[str] = mapped_column(String(100), nullable=False, default="Brasil")
+    salary_min: Mapped[int] = mapped_column(Integer, nullable=False)
+    salary_max: Mapped[int] = mapped_column(Integer, nullable=False)
+    source: Mapped[str] = mapped_column(String(255), nullable=False)
+    updated_at: Mapped[date] = mapped_column(Date, nullable=False)
 
 
 class CareerPath(Base):

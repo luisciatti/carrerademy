@@ -2,30 +2,42 @@
 
 /* ── Light tokens ────────────────────────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #0a0e14;
-  --surface: #f4f5f7;
-  --surface-hover: #e9eaed;
-  --border: #e2e4e8;
-  --accent: #0d9488;
-  --accent-hover: #0f766e;
-  --muted: #6b7280;
-  --glow-primary: rgba(13, 148, 136, 0.12);
-  --glow-secondary: rgba(99, 102, 241, 0.08);
+  --background: #fff8f0;
+  --background-gradient-start: #f3e8ff;
+  --background-gradient-end: #fff0e5;
+  --foreground: #2d2a32;
+  --surface: #ffffff;
+  --surface-hover: #faf7ff;
+  --border: #ede7f6;
+  --accent: #4b7bec;
+  --accent-hover: #3d69cb;
+  --accent-blue: #4b7bec;
+  --accent-coral: #ff7e67;
+  --accent-mint: #2ed9a5;
+  --accent-purple: #9b72f2;
+  --muted: #7a7585;
+  --glow-primary: rgba(155, 114, 242, 0.14);
+  --glow-secondary: rgba(255, 126, 103, 0.12);
 }
 
 /* ── Dark tokens ─────────────────────────────────────────── */
 .dark {
-  --background: #09090b;
-  --foreground: #f4f4f5;
-  --surface: #18181b;
-  --surface-hover: #27272a;
-  --border: #27272a;
-  --accent: #14b8a6;
-  --accent-hover: #2dd4bf;
-  --muted: #a1a1aa;
-  --glow-primary: rgba(20, 184, 166, 0.22);
-  --glow-secondary: rgba(13, 148, 136, 0.24);
+  --background: #16111f;
+  --background-gradient-start: #2a1839;
+  --background-gradient-end: #2b1c28;
+  --foreground: #f7f1ff;
+  --surface: #241c31;
+  --surface-hover: #2d233c;
+  --border: #3a2d4b;
+  --accent: #90a8ff;
+  --accent-hover: #aebcff;
+  --accent-blue: #90a8ff;
+  --accent-coral: #ff9d8d;
+  --accent-mint: #79efcb;
+  --accent-purple: #c4a2ff;
+  --muted: #b9aec8;
+  --glow-primary: rgba(155, 114, 242, 0.22);
+  --glow-secondary: rgba(255, 126, 103, 0.16);
 }
 
 /* ── Tailwind v4 theme mapping ───────────────────────────── */
@@ -37,6 +49,10 @@
   --color-border: var(--border);
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
+  --color-accent-blue: var(--accent-blue);
+  --color-accent-coral: var(--accent-coral);
+  --color-accent-mint: var(--accent-mint);
+  --color-accent-purple: var(--accent-purple);
   --color-muted: var(--muted);
   --font-sans: var(--font-space-grotesk);
   --font-mono: var(--font-jetbrains-mono);
@@ -63,10 +79,23 @@ html {
 body {
   min-height: 100dvh;
   background:
-    radial-gradient(1200px 800px at 15% -10%, var(--glow-primary), transparent),
-    radial-gradient(1000px 700px at 90% 0%, var(--glow-secondary), transparent),
-    var(--background);
+    radial-gradient(1000px 700px at 15% 15%, var(--glow-primary), transparent 55%),
+    radial-gradient(900px 650px at 85% 10%, var(--glow-secondary), transparent 52%),
+    linear-gradient(135deg, var(--background-gradient-start), var(--background-gradient-end));
   color: var(--foreground);
   font-family: var(--font-space-grotesk), sans-serif;
   transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+@layer components {
+  .app-card {
+    border-radius: 1.5rem;
+    background: var(--surface);
+    border: 1px solid color-mix(in srgb, white 40%, transparent);
+    box-shadow: 0 18px 45px rgba(99, 78, 117, 0.08);
+  }
+
+  .dark .app-card {
+    border-color: color-mix(in srgb, var(--border) 70%, transparent);
+  }
 }

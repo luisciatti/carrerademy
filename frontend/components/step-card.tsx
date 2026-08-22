@@ -21,10 +21,10 @@ const TYPE_LABELS: Record<string, string> = {
 
 // Dashed border accent for bonus nodes, keyed by content type
 const BONUS_BORDER: Record<string, string> = {
-    DIALOGUE_SIMULATOR: "border-violet-500/50",
-    SCENARIO_BUILDER: "border-amber-500/50",
-    MATCHING_GAME: "border-sky-500/50",
-    RULES_RADIAL: "border-teal-500/50",
+    DIALOGUE_SIMULATOR: "border-[color:var(--accent-purple)]/45",
+    SCENARIO_BUILDER: "border-[color:var(--accent-coral)]/45",
+    MATCHING_GAME: "border-[color:var(--accent-blue)]/45",
+    RULES_RADIAL: "border-[color:var(--accent-mint)]/45",
 };
 
 type VariantTokens = {
@@ -40,33 +40,33 @@ function tokens(variant: StepCardVariant, step: CareerPathStep): VariantTokens {
     switch (variant) {
         case "current":
             return {
-                border: "border-accent",
+                border: "border-[color:var(--accent-purple)]",
                 borderStyle: "border-2",
-                bg: "bg-surface/90",
+                bg: "bg-white/90 dark:bg-surface/90",
                 opacity: "",
-                hover: "hover:-translate-y-0.5 hover:shadow-md hover:border-accent",
+                hover: "hover:-translate-y-0.5 hover:shadow-md hover:border-[color:var(--accent-purple)]",
             };
         case "available":
             return {
                 border: "border-border/60",
                 borderStyle: "border",
-                bg: "bg-surface/50",
+                bg: "bg-white/80 dark:bg-surface/60",
                 opacity: "",
-                hover: "hover:-translate-y-0.5 hover:border-accent/40 hover:shadow-md",
+                hover: "hover:-translate-y-0.5 hover:border-[color:var(--accent-blue)]/40 hover:shadow-md",
             };
         case "completed":
             return {
-                border: "border-emerald-700/50",
+                border: "border-[color:var(--accent-mint)]/45",
                 borderStyle: "border",
-                bg: "bg-emerald-950/15",
+                bg: "bg-[color:var(--accent-mint)]/10",
                 opacity: "",
-                hover: "hover:-translate-y-0.5 hover:border-emerald-600/60 hover:shadow-sm",
+                hover: "hover:-translate-y-0.5 hover:border-[color:var(--accent-mint)]/60 hover:shadow-sm",
             };
         case "locked":
             return {
-                border: isPremium ? "border-amber-700/30" : "border-border/30",
+                border: isPremium ? "border-[color:var(--accent-coral)]/30" : "border-border/30",
                 borderStyle: "border",
-                bg: isPremium ? "bg-amber-950/10" : "bg-surface/30",
+                bg: isPremium ? "bg-[color:var(--accent-coral)]/10" : "bg-white/60 dark:bg-surface/40",
                 opacity: "opacity-60",
                 hover: "", // not interactive
             };
@@ -74,8 +74,8 @@ function tokens(variant: StepCardVariant, step: CareerPathStep): VariantTokens {
             return {
                 border: BONUS_BORDER[step.content_type ?? ""] ?? "border-border/50",
                 borderStyle: "border border-dashed",
-                bg: "bg-surface/40",
-                opacity: "",
+                bg: "bg-white/70 dark:bg-surface/45",
+                opacity: "opacity-80",
                 hover: "hover:-translate-y-0.5 hover:shadow-sm",
             };
     }
@@ -98,31 +98,32 @@ export function StepCard({ step, variant, isActive = false }: StepCardProps) {
     })();
 
     // Optional active ring
-    const activeRing = isActive ? "ring-1 ring-accent/40" : "";
+    const activeRing = isActive ? "ring-2 ring-[color:var(--accent-purple)]/25" : "";
+    const bonusScale = variant === "bonus" ? "scale-[0.97]" : "scale-100";
 
     return (
         <div
-            className={`${tk.borderStyle} ${tk.border} ${tk.bg} ${tk.opacity} ${tk.hover} ${activeRing} rounded-2xl p-3 transition-all duration-150`}
+            className={`${tk.borderStyle} ${tk.border} ${tk.bg} ${tk.opacity} ${tk.hover} ${activeRing} ${bonusScale} rounded-2xl p-3 transition-all duration-150`}
         >
             {/* Header */}
             <div className="flex items-center justify-between gap-2">
                 <p className="text-[10px] font-medium uppercase tracking-wide text-muted">
-                    {variant === "bonus" ? "Bônus" : `Etapa ${step.order_index + 1}`}
+                    {variant === "bonus" ? "Bonus opcional" : `Etapa ${step.order_index + 1}`}
                     {typeLabel ? ` · ${typeLabel}` : ""}
                 </p>
                 <span className="flex-shrink-0">
                     {variant === "available" && (
-                        <span className="rounded-full bg-teal-500/20 px-1.5 py-0.5 text-[10px] text-teal-300">
+                        <span className="rounded-full bg-[color:var(--accent-blue)]/15 px-1.5 py-0.5 text-[10px] text-[color:var(--accent-blue)]">
                             Disponível
                         </span>
                     )}
                     {variant === "completed" && (
-                        <span className="flex items-center gap-0.5 rounded-full bg-emerald-500/20 px-1.5 py-0.5 text-[10px] text-emerald-300">
+                        <span className="flex items-center gap-0.5 rounded-full bg-[color:var(--accent-mint)]/18 px-1.5 py-0.5 text-[10px] text-[color:var(--accent-mint)]">
                             <CheckSquare className="h-2.5 w-2.5" />
                         </span>
                     )}
                     {variant === "locked" && step.is_description_locked && (
-                        <span className="rounded-full bg-amber-500/20 px-1.5 py-0.5 text-[10px] text-amber-300">
+                        <span className="rounded-full bg-[color:var(--accent-coral)]/15 px-1.5 py-0.5 text-[10px] text-[color:var(--accent-coral)]">
                             Premium
                         </span>
                     )}
@@ -142,7 +143,7 @@ export function StepCard({ step, variant, isActive = false }: StepCardProps) {
                     {Array.from({ length: Math.min(total, 6) }).map((_, i) => (
                         <div
                             key={i}
-                            className={`h-1 flex-1 rounded-full ${i < doneCount ? "bg-emerald-400" : i === doneCount && (variant === "current" || variant === "bonus") ? "bg-accent" : "bg-border/60"}`}
+                            className={`h-1 flex-1 rounded-full ${i < doneCount ? "bg-[color:var(--accent-mint)]" : i === doneCount && (variant === "current" || variant === "bonus") ? "bg-[color:var(--accent-purple)]" : "bg-border/60"}`}
                         />
                     ))}
                     {total > 6 && (

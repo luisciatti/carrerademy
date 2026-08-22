@@ -23,9 +23,9 @@ const CAREER_ICONS: Record<string, string> = {
 };
 
 function deriveLevel(pct: number): { label: string; color: string } {
-    if (pct >= 67) return { label: "Avançado", color: "bg-amber-500/20 text-amber-300 border-amber-500/30" };
-    if (pct >= 34) return { label: "Intermediário", color: "bg-violet-500/20 text-violet-300 border-violet-500/30" };
-    return { label: "Fundamentos", color: "bg-teal-500/20 text-teal-300 border-teal-500/30" };
+    if (pct >= 67) return { label: "Avançado", color: "bg-accent-mint/20 text-accent-mint border-accent-mint/35" };
+    if (pct >= 34) return { label: "Intermediário", color: "bg-accent-purple/20 text-accent-purple border-accent-purple/35" };
+    return { label: "Fundamentos", color: "bg-accent-blue/20 text-accent-blue border-accent-blue/35" };
 }
 
 function estimateTrailMinutes(steps: CareerPath["steps"]): number {
@@ -57,10 +57,10 @@ export function TrailHeaderCard({ path, completionRate, selectedKind, onKindChan
     const careerEmoji = CAREER_ICONS[careerTag] ?? "🎯";
 
     return (
-        <section className="rounded-2xl border border-border/60 bg-surface/40 p-5 md:p-6">
+        <section className="app-card p-5 md:p-6">
             <div className="flex flex-wrap items-start justify-between gap-4">
                 <div className="flex items-start gap-4">
-                    <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl border border-teal-700/40 bg-teal-500/10 text-2xl">
+                    <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl border border-accent-blue/30 bg-accent-blue/10 text-2xl">
                         {careerEmoji}
                     </div>
                     <div>
@@ -106,7 +106,7 @@ export function TrailHeaderCard({ path, completionRate, selectedKind, onKindChan
                     <span>{completedCount} concluídas</span>
                 </div>
                 {completionRate < 100 && (
-                    <div className="flex items-center gap-2 text-teal-400">
+                    <div className="flex items-center gap-2 text-accent-blue">
                         <Flame className="h-4 w-4" />
                         <span>
                             {milestone.at - completionRate}% para o {milestone.label}
@@ -118,7 +118,7 @@ export function TrailHeaderCard({ path, completionRate, selectedKind, onKindChan
             {/* Progress bar */}
             <div className="mt-4 h-2.5 overflow-hidden rounded-full bg-border">
                 <div
-                    className={`h-full rounded-full bg-accent transition-all duration-700 ${recentlyCompleted ? "shadow-[0_0_20px_rgba(20,184,166,0.5)]" : ""}`}
+                    className={`h-full rounded-full bg-accent transition-all duration-700 ${recentlyCompleted ? "shadow-[0_0_20px_rgba(75,123,236,0.45)]" : ""}`}
                     style={{ width: `${completionRate}%` }}
                 />
             </div>

@@ -68,7 +68,7 @@ export function NoteEditor({ initialContent, onSave, className = "", placeholder
                     </span>
                 )}
                 {saveState === "saved" && (
-                    <span className="flex items-center gap-1 text-[11px] text-teal-400 transition-opacity">
+                    <span className="flex items-center gap-1 text-[11px] text-accent-blue transition-opacity">
                         <Check className="h-2.5 w-2.5" />
                         Salvo
                     </span>
@@ -80,7 +80,7 @@ export function NoteEditor({ initialContent, onSave, className = "", placeholder
                 value={content}
                 onChange={(e) => handleChange(e.target.value)}
                 placeholder={placeholder ?? "Escreva suas anotações aqui… (markdown suportado)"}
-                className="flex-1 resize-none rounded-xl border border-border bg-[hsl(var(--surface))] px-4 py-3 font-mono text-sm text-foreground placeholder:text-muted focus:border-accent focus:outline-none"
+                className="flex-1 resize-none rounded-xl border border-border bg-surface px-4 py-3 font-mono text-sm text-foreground placeholder:text-muted focus:border-accent focus:outline-none"
                 spellCheck={false}
             />
         </div>

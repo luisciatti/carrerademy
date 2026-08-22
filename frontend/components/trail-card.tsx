@@ -48,23 +48,27 @@ export function TrailCard({ path, hasSubscription, ctaHref }: TrailCardProps) {
     const hasProgress = completedCount > 0;
     const isAi = path.kind === "AI_PERSONALIZED";
 
-    const cardBase = "group relative rounded-2xl border p-6 transition-all duration-150";
+    const accentByKind = path.kind === "AI_PERSONALIZED"
+        ? { progress: "bg-[color:var(--accent-purple)]", cta: "bg-[var(--accent-purple)]", hover: "hover:shadow-[0_16px_36px_rgba(155,114,242,0.16)]" }
+        : { progress: "bg-[color:var(--accent-blue)]", cta: "bg-[var(--accent-blue)]", hover: "hover:shadow-[0_16px_36px_rgba(75,123,236,0.14)]" };
+
+    const cardBase = "group relative rounded-3xl border border-white/40 bg-surface p-6 shadow-[0_18px_42px_rgba(99,78,117,0.08)] transition-all duration-150";
     const cardVariant: Record<Variant, string> = {
-        active: "border-border/60 bg-surface/40 hover:-translate-y-0.5 hover:border-accent/40 hover:shadow-[0_8px_28px_rgba(0,0,0,0.3)]",
-        premium: "border-amber-700/40 bg-gradient-to-br from-amber-950/30 to-surface/40 hover:-translate-y-0.5 hover:border-amber-500/50 hover:shadow-[0_8px_28px_rgba(0,0,0,0.3)]",
-        generating: "border-border/40 bg-surface/30",
+        active: `${accentByKind.hover} hover:-translate-y-0.5`,
+        premium: "bg-gradient-to-br from-[color:var(--accent-coral)]/10 to-surface hover:-translate-y-0.5 hover:shadow-[0_16px_36px_rgba(255,126,103,0.14)]",
+        generating: "bg-gradient-to-br from-[color:var(--accent-blue)]/8 to-surface",
     };
 
     const badgeVariant: Record<Variant, { label: string; cls: string }> = {
         active: isAi
-            ? { label: "PERSONALIZADA", cls: "bg-teal-500/20 text-teal-200 border-teal-700/40" }
-            : { label: "GRÁTIS", cls: "bg-emerald-500/20 text-emerald-200 border-emerald-700/40" },
-        premium: { label: "PREMIUM", cls: "bg-amber-500/20 text-amber-200 border-amber-700/40" },
-        generating: { label: "GERANDO", cls: "bg-cyan-500/20 text-cyan-200 border-cyan-700/40" },
+            ? { label: "PERSONALIZADA", cls: "border-0 bg-[color:var(--accent-purple)]/14 text-[color:var(--accent-purple)]" }
+            : { label: "GRATIS", cls: "border-0 bg-[color:var(--accent-mint)]/18 text-[color:var(--accent-blue)]" },
+        premium: { label: "PREMIUM", cls: "border-0 bg-[color:var(--accent-coral)]/16 text-[color:var(--accent-coral)]" },
+        generating: { label: "GERANDO", cls: "border-0 bg-[color:var(--accent-blue)]/14 text-[color:var(--accent-blue)]" },
     };
 
     const badge = badgeVariant[variant];
-    const progressColor = variant === "premium" ? "bg-amber-400" : "bg-accent";
+    const progressColor = variant === "premium" ? "bg-[color:var(--accent-coral)]" : accentByKind.progress;
 
     return (
         <article className={`${cardBase} ${cardVariant[variant]}`}>
@@ -74,7 +78,7 @@ export function TrailCard({ path, hasSubscription, ctaHref }: TrailCardProps) {
                     {badge.label}
                 </span>
                 {variant === "premium" && (
-                    <Lock className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-400/70" />
+                    <Lock className="mt-0.5 h-4 w-4 flex-shrink-0 text-[color:var(--accent-coral)]/80" />
                 )}
             </div>
 
@@ -127,13 +131,13 @@ export function TrailCard({ path, hasSubscription, ctaHref }: TrailCardProps) {
             <div className="mt-5">
                 {variant === "generating" ? (
                     <p className="flex items-center gap-2 text-xs text-muted">
-                        <Loader2 className="h-3.5 w-3.5 animate-spin text-cyan-400" />
+                        <Loader2 className="h-3.5 w-3.5 animate-spin text-[color:var(--accent-blue)]" />
                         Aguarde — sua trilha está sendo criada…
                     </p>
                 ) : variant === "premium" ? (
                     <Link
                         href={ctaHref}
-                        className="inline-flex items-center gap-2 rounded-xl border border-amber-600/50 bg-amber-500/10 px-4 py-2.5 text-sm font-bold text-amber-200 transition-colors duration-150 hover:bg-amber-500/20 hover:border-amber-500/60"
+                        className="inline-flex items-center gap-2 rounded-full bg-[color:var(--accent-coral)] px-4 py-2.5 text-sm font-bold text-white transition-colors duration-150 hover:opacity-90"
                     >
                         <Lock className="h-4 w-4" />
                         Desbloquear
@@ -141,7 +145,7 @@ export function TrailCard({ path, hasSubscription, ctaHref }: TrailCardProps) {
                 ) : (
                     <Link
                         href={ctaHref}
-                        className="inline-flex items-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-sm font-bold text-background transition-colors duration-150 hover:bg-accent-hover"
+                        className={`inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-bold text-white transition-colors duration-150 hover:opacity-90 ${accentByKind.cta}`}
                     >
                         {hasProgress ? "Continuar" : "Começar"}
                         <ArrowRight className="h-4 w-4" />

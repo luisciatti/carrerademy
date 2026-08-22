@@ -82,8 +82,8 @@ export default function PerfilPage() {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <section className="flex flex-wrap items-center gap-5 rounded-2xl border border-teal-900/30 bg-surface/40 p-6">
-                <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-teal-500/20 text-2xl font-black text-teal-200 ring-2 ring-teal-500/40">
+            <section className="app-card flex flex-wrap items-center gap-5 p-6">
+                <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-accent-blue/20 text-2xl font-black text-accent-blue ring-2 ring-accent-blue/35">
                     {clerkUser?.imageUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={clerkUser.imageUrl} alt={profile.user.name} className="h-16 w-16 rounded-full object-cover" />
@@ -111,7 +111,7 @@ export default function PerfilPage() {
                     { label: "Melhor sequencia", value: `${stats.best_streak} dias` },
                     { label: "Badges conquistados", value: unlockedCount },
                 ].map(({ label, value }) => (
-                    <article key={label} className="rounded-2xl border border-border bg-surface p-4">
+                    <article key={label} className="app-card p-4">
                         <p className="text-xs uppercase tracking-wider text-muted">{label}</p>
                         <p className="mt-2 text-3xl font-black text-foreground">{value}</p>
                     </article>
@@ -119,15 +119,15 @@ export default function PerfilPage() {
             </section>
 
             {/* Badges */}
-            <section className="rounded-2xl border border-border bg-surface p-6">
+            <section className="app-card p-6">
                 <h2 className="text-sm font-semibold uppercase tracking-widest text-muted">Conquistas</h2>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {achievements.map((a) => (
                         <div
                             key={a.id}
-                            className={`flex items-start gap-3 rounded-xl border p-4 transition-all duration-150 ${a.unlocked ? "border-teal-800/40 bg-teal-900/10 hover:border-teal-600/60 hover:bg-teal-900/20" : "border-border opacity-40"}`}
+                            className={`flex items-start gap-3 rounded-xl border p-4 transition-all duration-150 ${a.unlocked ? "border-accent-blue/40 bg-accent-blue/10 hover:border-accent-blue/60 hover:bg-accent-blue/15" : "border-border opacity-40"}`}
                         >
-                            <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl ${a.unlocked ? "bg-teal-500/20 text-teal-300" : "bg-surface text-muted"}`}>
+                            <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl ${a.unlocked ? "bg-accent-blue/20 text-accent-blue" : "bg-surface text-muted"}`}>
                                 {ICON_MAP[a.icon] ?? <BookOpen className="h-6 w-6" />}
                             </div>
                             <div>
@@ -140,7 +140,7 @@ export default function PerfilPage() {
             </section>
 
             {/* Trails */}
-            <section className="rounded-2xl border border-border bg-surface p-6">
+            <section className="app-card p-6">
                 <h2 className="text-sm font-semibold uppercase tracking-widest text-muted">Trilhas</h2>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
                     {paths.map((path) => {
@@ -149,13 +149,13 @@ export default function PerfilPage() {
                             <div key={path.id} className="rounded-xl border border-border bg-surface-hover p-4">
                                 <div className="flex items-center justify-between gap-2">
                                     <p className="text-xs text-muted">{KIND_LABELS[path.kind] ?? path.kind}</p>
-                                    <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${path.status === "COMPLETED" ? "bg-emerald-500/20 text-emerald-300" : path.status === "ACTIVE" ? "bg-teal-500/20 text-teal-300" : "bg-surface text-muted"}`}>
+                                    <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${path.status === "COMPLETED" ? "bg-accent-mint/20 text-accent-mint" : path.status === "ACTIVE" ? "bg-accent-blue/20 text-accent-blue" : "bg-surface text-muted"}`}>
                                         {path.status === "COMPLETED" ? "Concluida" : path.status === "ACTIVE" ? "Em andamento" : path.status}
                                     </span>
                                 </div>
                                 <p className="mt-1 text-sm font-semibold text-foreground">{path.title}</p>
                                 <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-border">
-                                    <div className="h-full rounded-full bg-teal-500" style={{ width: `${pct}%` }} />
+                                    <div className="h-full rounded-full bg-accent" style={{ width: `${pct}%` }} />
                                 </div>
                                 <p className="mt-1 text-xs text-muted">{pct}% — {path.steps_completed}/{path.steps_total} etapas</p>
                             </div>
@@ -165,9 +165,9 @@ export default function PerfilPage() {
             </section>
 
             {/* Leaderboard */}
-            <section className="rounded-2xl border border-border bg-surface p-6">
+            <section className="app-card p-6">
                 <div className="flex items-center gap-3">
-                    <Trophy className="h-5 w-5 text-amber-400" />
+                    <Trophy className="h-5 w-5 text-accent-coral" />
                     <h2 className="text-sm font-semibold uppercase tracking-widest text-muted">Ranking do mes</h2>
                 </div>
                 {leaderboard.length === 0 ? (
@@ -176,11 +176,11 @@ export default function PerfilPage() {
                     <ol className="mt-4 space-y-2">
                         {leaderboard.map((entry) => (
                             <li key={entry.rank} className="flex items-center gap-4 rounded-xl border border-border bg-surface-hover px-4 py-3">
-                                <span className={`w-6 text-center text-sm font-bold ${entry.rank === 1 ? "text-amber-400" : entry.rank === 2 ? "text-muted" : entry.rank === 3 ? "text-amber-700" : "text-muted"}`}>
+                                <span className={`w-6 text-center text-sm font-bold ${entry.rank === 1 ? "text-accent-coral" : entry.rank === 2 ? "text-muted" : entry.rank === 3 ? "text-accent-purple" : "text-muted"}`}>
                                     #{entry.rank}
                                 </span>
                                 <span className="flex-1 text-sm text-foreground">{entry.name}</span>
-                                <span className="text-sm font-semibold text-teal-300">{entry.points} pts</span>
+                                <span className="text-sm font-semibold text-accent-blue">{entry.points} pts</span>
                             </li>
                         ))}
                     </ol>

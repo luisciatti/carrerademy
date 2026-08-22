@@ -60,19 +60,19 @@ export function ActiveStepCard({ step, pathKind, onStart }: ActiveStepCardProps)
     const ctaLabel = hasProgress ? "Continuar" : pathKind === "STANDARD_SOFT_SKILLS" ? "Começar" : "Iniciar etapa";
 
     return (
-        <section className="relative overflow-hidden rounded-2xl border border-teal-600/40 bg-gradient-to-br from-teal-500/10 to-surface/30 p-5 shadow-[0_0_40px_rgba(20,184,166,0.08)] md:p-6">
+        <section className="relative overflow-hidden rounded-2xl border border-accent-blue/35 bg-gradient-to-br from-accent-blue/12 via-accent-purple/8 to-surface/40 p-5 shadow-[0_0_40px_rgba(75,123,236,0.12)] md:p-6">
             {/* "Você está aqui" badge */}
-            <div className="absolute right-4 top-4 flex items-center gap-1.5 rounded-full bg-teal-500/20 px-3 py-1 text-xs font-semibold text-teal-300 ring-1 ring-teal-500/30">
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-teal-400" />
+            <div className="absolute right-4 top-4 flex items-center gap-1.5 rounded-full bg-accent-blue/20 px-3 py-1 text-xs font-semibold text-accent-blue ring-1 ring-accent-blue/35">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent-blue" />
                 Você está aqui
             </div>
 
             <div className="flex items-start gap-4">
-                <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl border border-teal-500/40 bg-teal-500/20 text-teal-300">
+                <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl border border-accent-blue/35 bg-accent-blue/20 text-accent-blue">
                     {stepIcon(step.content_type)}
                 </div>
                 <div className="min-w-0 flex-1 pr-28">
-                    <p className="text-xs uppercase tracking-wide text-teal-400">
+                    <p className="text-xs uppercase tracking-wide text-accent-blue/80">
                         Etapa {step.order_index + 1} · {typeName}
                     </p>
                     <h2 className="mt-1 text-lg font-black text-foreground">{step.title}</h2>
@@ -98,7 +98,7 @@ export function ActiveStepCard({ step, pathKind, onStart }: ActiveStepCardProps)
                         {Array.from({ length: totalStages }).map((_, i) => (
                             <div
                                 key={i}
-                                className={`h-1.5 flex-1 rounded-full transition-all ${i < currentStage ? "bg-teal-400" : i === currentStage && hasProgress ? "bg-teal-400/50" : "bg-border"}`}
+                                className={`h-1.5 flex-1 rounded-full transition-all ${i < currentStage ? "bg-accent-blue" : i === currentStage && hasProgress ? "bg-accent-blue/50" : "bg-border"}`}
                             />
                         ))}
                     </div>

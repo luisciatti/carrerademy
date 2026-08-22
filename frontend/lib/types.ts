@@ -129,11 +129,67 @@ export type OnboardingPayload = {
 };
 
 export type OnboardingResponse = {
+    onboarding_response_id: string;
+    standard_career_path_id: string;
+    ai_career_path_id: string;
+    standard_status: string;
+    ai_status: string;
+    identity_statement: string;
+    identity_statement_generated_at: string | null;
+    message: string;
+};
+
+export type OnboardingDraftResponse = {
+    onboarding_response_id: string;
+    identity_statement: string;
+    identity_statement_generated_at: string | null;
+};
+
+export type OnboardingExploreResponse = {
+    onboarding_response_id: string;
     standard_career_path_id: string;
     ai_career_path_id: string;
     standard_status: string;
     ai_status: string;
     message: string;
+};
+
+export type OnboardingContextResponse = {
+    onboarding_response_id: string;
+    career_type: CareerType;
+    goal: GoalType;
+    current_job: string;
+    dream_job: string | null;
+    weekly_time_availability: number;
+    identity_statement: string;
+};
+
+export type SalaryBenchmarkTeaser = {
+    role_title: string;
+    region: string;
+    visible_salary_min: number;
+    visible_salary_max_hint: string;
+    masked_salary_range: string;
+    source: string;
+    updated_at: string;
+};
+
+export type LiveJobsTeaser = {
+    provider: string;
+    search_query: string;
+    search_url: string;
+};
+
+export type PaywallTeaserResponse = {
+    onboarding_context: OnboardingContextResponse;
+    salary_benchmark: SalaryBenchmarkTeaser | null;
+    live_jobs: LiveJobsTeaser;
+};
+
+export type IdentityStatementResponse = {
+    onboarding_response_id: string;
+    identity_statement: string;
+    identity_statement_generated_at: string | null;
 };
 
 export type CareerPathStep = {

@@ -1,109 +1,90 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
-import { extractApiMessage, isApiNotFound, useBackendApi } from "@/lib/api";
-import type { CareerPath } from "@/lib/types";
+import { extractApiMessage } from "@/lib/api";
+import { useMyCareerPathsQuery } from "@/lib/backend-queries";
 
 export default function EscolhaTrilhaPage() {
-    const api = useBackendApi();
-    const [loading, setLoading] = useState(true);
+    const router = useRouter();
     const [error, setError] = useState<string | null>(null);
-    const [paths, setPaths] = useState<CareerPath[]>([]);
+    const [nextHref, setNextHref] = useState<string | null>(null);
+    const pathsQuery = useMyCareerPathsQuery();
+
+    const resolvedError = useMemo(() => {
+        if (error) {
+            return error;
+        }
+        if (pathsQuery.error) {
+            return extractApiMessage(pathsQuery.error, "Nao foi possivel carregar suas trilhas.");
+        }
+        return null;
+    }, [error, pathsQuery.error]);
+    const loading = pathsQuery.isLoading;
 
     useEffect(() => {
-        let cancelled = false;
-
-        async function load() {
-            setLoading(true);
-            setError(null);
-            try {
-                const result = await api.getMyCareerPaths();
-                if (!cancelled) {
-                    setPaths(result);
-                }
-            } catch (e) {
-                if (!cancelled) {
-                    if (isApiNotFound(e)) {
-                        setError("Ainda nao encontramos trilhas para sua conta. Refaça o onboarding para continuar.");
-                    } else {
-                        setError(extractApiMessage(e, "Nao foi possivel carregar suas trilhas."));
-                    }
-                }
-            } finally {
-                if (!cancelled) {
-                    setLoading(false);
-                }
-            }
+        if (pathsQuery.isLoading || pathsQuery.error) {
+            return;
         }
 
-        void load();
-        return () => {
-            cancelled = true;
-        };
-    }, [api]);
+        const result = pathsQuery.data ?? [];
+        if (result.length === 0) {
+            setError("Ainda nao encontramos trilhas para sua conta. Refaça o onboarding para continuar.");
+            return;
+        }
 
-    const standardPath = useMemo(() => paths.find((path) => path.kind === "STANDARD_SOFT_SKILLS") ?? null, [paths]);
-    const aiPath = useMemo(() => paths.find((path) => path.kind === "AI_PERSONALIZED") ?? null, [paths]);
+        const standardPath = result.find((path) => path.kind === "STANDARD_SOFT_SKILLS");
+        const activePath = result.find((path) => path.status === "ACTIVE");
+        const generatingAi = result.find((path) => path.kind === "AI_PERSONALIZED" && path.status === "GENERATING");
+        const fallbackPath = result[0];
+
+        const href = standardPath
+            ? `/trilha/${standardPath.id}`
+            : activePath
+                ? `/trilha/${activePath.id}`
+                : generatingAi
+                    ? `/trilha/gerando?career_path_id=${generatingAi.id}`
+                    : fallbackPath
+                        ? `/trilha/${fallbackPath.id}`
+                        : "/dashboard";
+
+        setNextHref(href);
+        router.replace(href);
+    }, [pathsQuery.data, pathsQuery.error, pathsQuery.isLoading, router]);
 
     if (loading) {
         return (
             <div className="space-y-4">
-                <div className="h-32 animate-pulse rounded-2xl bg-zinc-900/70" />
-                <div className="h-48 animate-pulse rounded-2xl bg-zinc-900/70" />
+                <div className="h-32 animate-pulse rounded-2xl bg-surface" />
+                <div className="h-48 animate-pulse rounded-2xl bg-surface" />
             </div>
         );
     }
 
-    if (error) {
-        return <p className="rounded-xl border border-rose-900/60 bg-rose-950/40 p-4 text-sm text-rose-200">{error}</p>;
+    if (resolvedError) {
+        return <p className="rounded-xl border border-rose-900/60 bg-rose-950/40 p-4 text-sm text-rose-200">{resolvedError}</p>;
     }
 
     return (
         <div className="space-y-6">
-            <section className="rounded-2xl border border-teal-900/40 bg-zinc-950/70 p-6">
-                <p className="text-xs uppercase tracking-widest text-zinc-500">Escolha sua experiencia</p>
-                <h1 className="mt-2 text-2xl font-black text-zinc-100">Suas trilhas estao prontas</h1>
-                <p className="mt-2 text-sm text-zinc-300">
-                    Comece agora pela trilha Always Free ou acompanhe sua trilha personalizada por IA.
+            <section className="app-card bg-gradient-to-r from-accent-purple/12 via-accent-blue/10 to-accent-mint/10 p-6">
+                <p className="text-xs uppercase tracking-widest text-accent-blue/80">Redirecionando</p>
+                <h1 className="mt-2 text-2xl font-black text-foreground">Abrindo sua proxima etapa</h1>
+                <p className="mt-2 text-sm text-muted">
+                    Para reduzir decisoes no inicio, abrimos automaticamente sua trilha principal.
                 </p>
+                {nextHref && (
+                    <Link href={nextHref} className="mt-4 inline-flex rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white hover:bg-accent-hover">
+                        Continuar agora
+                    </Link>
+                )}
             </section>
 
-            <section className="grid gap-4 lg:grid-cols-2">
-                <article className="rounded-2xl border border-emerald-800/40 bg-emerald-950/20 p-6">
-                    <div className="flex items-center justify-between gap-3">
-                        <h2 className="text-xl font-bold text-zinc-100">Trilha Normal (Always Free)</h2>
-                        <span className="rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-semibold text-emerald-200">Gratis</span>
-                    </div>
-                    <p className="mt-2 text-sm text-zinc-300">
-                        Conteudo liberado para sempre com video no YouTube, reflexoes e mini-jogos práticos.
-                    </p>
-                    <p className="mt-3 text-sm text-zinc-400">{standardPath?.title ?? "Pronta para iniciar"}</p>
-                    <Link href={standardPath ? `/trilha/${standardPath.id}` : "/constelacao"} className="mt-5 inline-flex rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-zinc-950 hover:bg-emerald-400">
-                        Entrar na Always Free
-                    </Link>
-                </article>
-
-                <article className="rounded-2xl border border-teal-800/40 bg-teal-950/20 p-6">
-                    <div className="flex items-center justify-between gap-3">
-                        <h2 className="text-xl font-bold text-zinc-100">Trilha Personalizada com IA</h2>
-                        <span className="rounded-full bg-teal-500/20 px-3 py-1 text-xs font-semibold text-teal-200">Premium</span>
-                    </div>
-                    <p className="mt-2 text-sm text-zinc-300">
-                        Cenarios e atividades adaptados ao seu objetivo e ao cargo que voce quer conquistar.
-                    </p>
-                    <p className="mt-3 text-sm text-zinc-400">
-                        {aiPath?.status === "GENERATING" ? "Estamos montando sua trilha agora." : aiPath?.title ?? "Aguardando disponibilidade"}
-                    </p>
-                    <Link
-                        href={aiPath?.status === "GENERATING" ? `/trilha/gerando?career_path_id=${aiPath.id}` : aiPath ? `/trilha/${aiPath.id}` : "/constelacao"}
-                        className="mt-5 inline-flex rounded-lg bg-teal-500 px-4 py-2 text-sm font-semibold text-zinc-950 hover:bg-teal-400"
-                    >
-                        {aiPath?.status === "GENERATING" ? "Acompanhar geracao" : "Abrir trilha IA"}
-                    </Link>
-                </article>
-            </section>
+            <p className="text-sm text-muted">
+                Se o redirecionamento nao acontecer, abra o <Link href="/dashboard" className="text-accent-blue hover:text-accent-hover">dashboard</Link>.
+            </p>
         </div>
     );
 }
